@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from dialogflow_lite.dialogflow import Dialogflow
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
