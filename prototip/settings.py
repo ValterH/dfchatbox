@@ -25,7 +25,7 @@ SECRET_KEY = '%cjc-r3rv4y45qzr!!s-n&4%w)+#0%gn_o6@=rh44r$v&pxe&j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 DIALOGFLOW = {
     'client_access_token': '7f7cb0e7be2e4b83b08b7106485a2078',
@@ -122,7 +122,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "dfchatbox/static"),
 ]
