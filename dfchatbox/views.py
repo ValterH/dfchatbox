@@ -5,7 +5,6 @@ from django.http import HttpResponse
 from django.core import serializers
 
 import re
-import requests
 import imgkit
 import string
 import random
@@ -15,6 +14,8 @@ import json
 from bs4 import BeautifulSoup
 import urllib3
 import apiai
+import requests
+
 
 # Create your views here.
 # -*- coding: utf-8 -*-
