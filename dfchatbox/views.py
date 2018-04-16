@@ -64,6 +64,8 @@ def index(request):
 		    data = answer_json['result']['fulfillment']['data']['data']
 		    response_type = answer_json['result']['fulfillment']['data']['responseType']
 		    url = answer_json['result']['fulfillment']['data']['url']
+		    if url[:5] != "https":
+		    	url = "https:" + url[5:]
 
 		    print("RESPONSE TYPE: ",url)
 
@@ -105,9 +107,10 @@ def check_links(request):
 			image_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20)) + ".jpg"
 			image_path = "dfchatbox/static/dfchatbox/img/" + image_name
 
-			config = imgkit.config(wkhtmltoimage='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe')
+			#config = imgkit.config(wkhtmltoimage='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe')
 			options = {'zoom': '1.2', 'width': '500', 'height': '500'}
-			imgkit.from_url(url,image_path,config=config,options=options)
+			#imgkit.from_url(url,image_path,config=config,options=options)
+			imgkit.from_url(url,image_path,options=options)
 		#	imgkit.from_file(file,image_path,config=config,options=options)
 
 			img = Image.open(image_path)

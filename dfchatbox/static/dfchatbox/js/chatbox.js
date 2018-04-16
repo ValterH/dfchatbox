@@ -44,9 +44,7 @@ function communicate(message,j){
     //CHECKS FOR URLS IN THE QUERY
 
     $.post('/check_links', {'message':message}, function(response){
-    console.log(response);
 
-    console.log(typeof(response));
     if (response != ""){
         //APPEND THE URL TITLE AND IMAGE OF THE WEBSITE IF THERE ARE LINKS
         data = JSON.parse(response);
@@ -73,14 +71,10 @@ function communicate(message,j){
 
     //SENDS DATA TO DJANGO WHICH COMMUNICATES WITH DIALOFLOW
     $.post(window.location.href, {"message": message},function(response){
-        console.log(response);
-        console.log(typeof(response));
 
         try {
             //DIALOGFLOW RESPONSE CONTAINS DATA
             response = JSON.parse(response);
-            console.log("TEXT ANSWER" + response['text_answer'] + " TYPE OF RSPNS: " + typeof(response));
-            console.log("DATA" + response['data'] + " TYPE OF RSPNS: " + typeof(response['data']));
 
             if (response['data'] == "" || response['data'] == "[]") {
                 throw "No data"
@@ -115,22 +109,11 @@ function communicate(message,j){
             data = JSON.parse(response['data'].replace(/'/g, '"'));
             response_type = response['response_type'];
 
-            //console.log("RESPONSE TYPE: " + response_type);
-
-            //console.log(data[1]['value']);
-
-            //console.log(data.length);
-
-            console.log("DATA OF RESPONSE: " + response['data'].replace(/'/g, '"'));
-
             if (response_type == "list") {
                 //DATA IS LIST OF JSON OBJECTS
-                console.log("LIST");
                 for (var k = 0; k < data.length; k++) {
                     var keys = Object.keys(data[k]);
                     var slo_keys = ["Datum","Ime","Vrednost"];
-                    console.log("KEYS: " + keys + " TYPEOF KEYS: " + typeof(keys));
-                    console.log("MSG: " + data[k]);
 
                     var oldDateFormat = new Date(data[k]['date']);
                     data[k]['date'] = oldDateFormat.toLocaleDateString();
@@ -162,8 +145,6 @@ function communicate(message,j){
                 var oldDateFormat = new Date(data['dateofbirth']);
                 data['dateofbirth'] = oldDateFormat.toLocaleDateString();
 
-                console.log(data)
-
                 $(".socketchatbox-chatArea").append( '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:2%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others"></span></div></div>');
 
                 for (var l = 0; l < keys.length; l++) {
@@ -181,7 +162,6 @@ function communicate(message,j){
         catch(err) {
             //DIALOGFLOW RESPONSE DOES NOT CONTAIN DATA
 
-            console.log("Couldn't parse.", err)
             typing(0,"others");
 
             $(".socketchatbox-chatArea").append( '<div class="socketchatbox-message-wrapper" id="wrapper' + j + '"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime">' + date + '</span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">' + response['text_answer'] +  '</span></div></div>');
