@@ -21,6 +21,8 @@ wkhtmltopdf = "==0.2"
 Django = "==2.0.4"
 Pillow = "==5.1.0"
 SpeechRecognition = "==3.7.1"
+gunicorn = "*"
+django-heroku = "*"
 
 [dev-packages]
 
