@@ -104,11 +104,13 @@ function disable_input(start) {
         $("#inputField").prop('disabled', true);
         $("#socketchatbox-sendFileBtn").css("background","#9a969a");
         $(".arrow-right").css("border-left","25px solid #bcbabb");
+        $(".socketchatbox-inputMessage").css("border","1px solid #9a969a");
     }
     else {
         $("#inputField").prop('disabled', false);
         $("#socketchatbox-sendFileBtn").css("background","#4DACFF");
         $(".arrow-right").css("border-left","25px solid #80DFFF");
+        $(".socketchatbox-inputMessage").css("border","1px solid #4DACFF");
     }
 };
 
