@@ -17,6 +17,16 @@ ul {
   list-style: none;
   word-wrap: break-word;
 }
+
+.arrow-right {
+  width: 0; 
+  height: 0; 
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  
+  border-left: 25px solid #80DFFF;
+}
+
 .socketchatbox-resize {
 
   top:0px;

@@ -24,6 +24,10 @@ import requests
 def index(request):
 	if request.method == 'POST':
 		message = request.POST['message']
+		sessionID = request.POST['sessionID']
+
+		print("*****SESSION ID*****   ",sessionID)
+
 		#print("user input: ", message)
 
 		url = "http://translate.dis-apps.ijs.si/translate?sentence=" + message
@@ -36,14 +40,15 @@ def index(request):
 
 		#print(message)
 
-		CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9" 
+		#CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
+		CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3" 
 
 		contexts = []
 
 		ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
 
 		request = ai.text_request()
-		request.session_id = "123333"
+		request.session_id = sessionID
 		request.lang = 'en'
 		request.contexts = contexts
 		request.query = message
@@ -52,9 +57,13 @@ def index(request):
 
 		answer_json = json.loads(data)
 
-		#print(answer_json)
+		print(answer_json)
 
 		text_answer = answer_json['result']['fulfillment']['messages'][0]['speech']
+
+		#text_answer = text_answer.replace('\\','\\\\')
+
+		print(text_answer)
 
 		data = ""
 		response_type = ""
@@ -63,13 +72,14 @@ def index(request):
 		if 'data' in answer_json['result']['fulfillment']:
 		    data = answer_json['result']['fulfillment']['data']['data']
 		    response_type = answer_json['result']['fulfillment']['data']['responseType']
+		    print("RESPONSE TYPE: ",response_type)
 		    url = answer_json['result']['fulfillment']['data']['url']
 		    if url[:5] != "https":
 		    	url = "https:" + url[5:]
 
-		    print("RESPONSE TYPE: ",url)
+		    
 
-		#print("data: ",data)
+		print("data: ",data)
 
 		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 	else:
@@ -111,7 +121,6 @@ def check_links(request):
 			options = {'zoom': '1.2', 'width': '500', 'height': '500'}
 			#imgkit.from_url(url,image_path,config=config,options=options)
 			imgkit.from_url(url,image_path,options=options)
-		#	imgkit.from_file(file,image_path,config=config,options=options)
 
 			img = Image.open(image_path)
 
