@@ -157,6 +157,8 @@ function communicate(message,j){
         message = message[1];
     }
 
+    message = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
     //CHECKS FOR URLS IN THE QUERY
     ////////////////////////////////////////////////////////////////////////////////// CURRENTLY DISABLED URL CHECKING //////////////////////////////////////////////////////////////////////////////////////
     //$.post('/check_links', {'message':message}, function(response){
