@@ -7,7 +7,7 @@ $(document).ready(function(){
     //session_isValid();
     $("#socketchatbox-sendFileBtn").css("background","#9a969a");
     $(".arrow-right").css("border-left","25px solid #bcbabb")
-    console.log("SESSION ID: " + localStorage.getItem("sessionID"));
+    //console.log("SESSION ID: " + localStorage.getItem("sessionID"));
 });
 
 $(".socketchatbox-page").keydown(function(t){
@@ -126,6 +126,10 @@ function reload_session_storage() {
     if (j == 0){
         var index = parseInt(sessionStorage.getItem("index"));
 
+        if (index == 0) {
+            return
+        }
+
         for (var i = 0; i < index; i++) {
             var element = sessionStorage.getItem(i);
             $(".socketchatbox-chatArea").append(element)
@@ -145,8 +149,6 @@ function reload_session_storage() {
 function communicate(message,j){
     disable_input(true);
     typing(1,"me");
-
-    console.log(message,typeof(message));
 
     if (typeof(message) == 'object'){
         var value = message[0];
@@ -197,9 +199,7 @@ function communicate(message,j){
     //$(".socketchatbox-typing").show();
 
     if (value) {
-        console.log("We are running");
         message = value;
-        console.log("MESSAGE  ",message);
     }
 
     //CHECKS SESSION
@@ -214,10 +214,7 @@ function communicate(message,j){
             //DIALOGFLOW RESPONSE CONTAINS DATA
             response = response.replace(/\n/g, "\\n");
             response = response.replace(/\r/g, "\\r");
-            console.log(response);
-            console.log(response[43],response[44],response[45]);
             response = JSON.parse(response);
-            console.log("DIALOGFLOW RESPONSE: " + response);
 
             if (response['data'] == "" || response['data'] == "[]") {
                 throw "No data"
@@ -301,12 +298,9 @@ function communicate(message,j){
 
                     for (var l = 0; l < keys.length; l++) {
                         if (typeof(data[k][keys[l]]) == 'object'){
-                            console.log(data[k][keys[l]]);
                             reply_others += slo_keys[l] + ": ";
                             reception = data[k][keys[l]];
                             //reception = JSON.parse(data[k][keys[l]]);
-
-                            console.log(reception);
 
                             reception_keys = Object.keys(reception);
 
@@ -382,11 +376,8 @@ function communicate(message,j){
 
             else if (response_type == "button") {
                 //DATA GIVES OPTIONS FOR USER
-                console.log("we're doing this");
-                console.log(data,typeof(data),data[0]);
 
                 for (var k = 0; k < data.length; k++) {
-                    console.log(data[k]);
                     $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
                     i += 1;
                 }
@@ -398,8 +389,7 @@ function communicate(message,j){
            
         }
         catch(err) {
-            console.log("except");
-            console.log(err);
+            //console.log(err);
             //DIALOGFLOW RESPONSE DOES NOT CONTAIN DATA
             try {
                 //return
@@ -440,7 +430,6 @@ $("#socketchatbox-top").click(function(){
     }
 
     $("#socketchatbox-body").toggle();
-    console.log("about to load data");
 
     setTimeout(function() {
         reload_session_storage();
@@ -466,8 +455,6 @@ $(".socketchatbox-page").keydown(function(t){
         date = cur_date();
 
         communicate(message,j);
-
-        console.log("setting cursor");
 
         $("#inputField").focus();
 
@@ -502,7 +489,6 @@ $(document).on("click", ".choice_btn", function(){
     message1 = document.getElementById(event.target.id).name;
     message2 = document.getElementById(event.target.id).innerHTML;
     message = [message1,message2];
-    console.log("MESSAGE " + message);
     $(".choice_btn").fadeOut(100, function(){ $(this).remove();});
 
     communicate(message,j);
