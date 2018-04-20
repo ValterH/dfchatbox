@@ -161,6 +161,15 @@ function communicate(message,j){
         message = message[1];
     }
 
+    try {
+        //$("#URLiFrame").remove();
+        //$("#URLiFrame").fadeOut(150, function() { $(this).remove(); });
+        $("#URLiFrame").animate({ height: 1 }, 400, function(){
+            $(this).remove();
+        });
+    }
+    catch(err){}
+
     message = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     //CHECKS FOR URLS IN THE QUERY
@@ -226,15 +235,6 @@ function communicate(message,j){
 
             if (response['data'] == "" || response['data'] == "[]") {
                 throw "No data"
-            }
-
-            try {
-                $("#URLiFrame").remove();
-            }
-            catch(err){}
-
-            if (response['url']) {
-                $("body").append('<iframe frameborder="0" style="overflow:hidden;height:100%;width:100%" id="URLiFrame" src="' + response['url'] + '" height="100%" width="100%"></iframe>')
             }
 
             typing(0,"others");
@@ -382,8 +382,9 @@ function communicate(message,j){
 
             }
 
-            else if (response_type == "button") {
+            else if (response_type == "procedures") {
                 //DATA GIVES OPTIONS FOR USER
+                console.log(data);
 
                 for (var k = 0; k < data.length; k++) {
                     $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
@@ -418,6 +419,13 @@ function communicate(message,j){
             $("#inputField").focus();
 
             document.getElementById("wrapper-others" + j).scrollIntoView({behavior: "smooth"});
+        }
+
+
+        if (response['url']) {
+            $(".socketchatbox-chatArea").append('<div id="URLiFrame" class="socketchatbox-message socketchatbox-message-others" style="width:80%;height:90%;padding:0.25%;border: 1px solid lightgray;border-radius:2px;box-shadow: 0px 0px 6px #B2B2B2;margin-bottom:1%;"><iframe frameborder="0" style="overflow:hidden;height:100%;width:100%" src="' + response['url'] + '" height="100%" width="100%"></iframe></div>');
+
+            document.getElementById("URLiFrame").scrollIntoView({behavior: "smooth"});
         }
 
         date = cur_date();

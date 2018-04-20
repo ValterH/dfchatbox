@@ -61,7 +61,7 @@ ul {
 
 
 .socketchatbox-inputMessage-div {
-  height: 10%;
+  height: 5%;
   font-size: 2em;
   border-radius: 0px 0px 5px 5px;
   /*padding-bottom: 10%;  */
@@ -155,8 +155,8 @@ ul {
 
 .socketchatbox-page {
   font-size: 12px; 
-  margin-left: 20%;
-  margin-right: 20%;
+  margin-left: 5%;
+  margin-right: 5%;
   /*margin-bottom: 5%;*/
   margin-top: 1%;
   /*margin: 0;*/
@@ -166,8 +166,8 @@ ul {
   border-radius: 5px;
   /*bottom:0px;*/
   /*overflow: auto;*/
-  width:60%;
-  height: 90%;
+  width:90%;
+  height: 95%;
   line-height:1em;
   /*  resize: horizontal;
 */
@@ -193,7 +193,7 @@ ul {
 
 .socketchatbox-chatArea {
   width: 100%;
-  height: 90%;
+  height: 95%;
   overflow-y: scroll;
   background: #EDEDED;
   /* border: 1px solid lightgray; */
@@ -240,8 +240,8 @@ ul {
 .socketchatbox-message {
   /*font-size: 3em;*/
   /* margin-bottom: 61px; */
-/*   width: 90%; 
-*/}
+   width: 400px; 
+}
 
 
 .socketchatbox-message-others {
