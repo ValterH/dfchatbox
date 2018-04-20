@@ -41,9 +41,9 @@ def index(request):
 		#print(message)
 
 		#THINKEHR
-		CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
+		#CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
 		#WAITING LINES
-		#CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3" 
+		CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3" 
 
 		contexts = []
 

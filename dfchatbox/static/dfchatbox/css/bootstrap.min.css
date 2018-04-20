@@ -101,7 +101,7 @@
 }
 
 .socketchatbox code,.socketchatbox kbd,.socketchatbox pre,.socketchatbox samp {
-    font-size: 1em
+    font-size: 10em
 }
 
 .socketchatbox button,.socketchatbox input,.socketchatbox optgroup,.socketchatbox select,.socketchatbox textarea {
@@ -3980,7 +3980,7 @@
 .socketchatbox .input-group-lg>.form-control,.socketchatbox .input-group-lg>.input-group-addon,.socketchatbox .input-group-lg>.input-group-btn>.btn {
     height: 46px;
     padding: 10px 16px;
-    font-size: 18px;
+    font-size: 180px;
     line-height: 1.3333333;
     border-radius: 6px
 }
@@ -3997,7 +3997,7 @@
 .socketchatbox .input-group-sm>.form-control,.socketchatbox .input-group-sm>.input-group-addon,.socketchatbox .input-group-sm>.input-group-btn>.btn {
     height: 30px;
     padding: 5px 10px;
-    font-size: 12px;
+    font-size: 120px;
     line-height: 1.5;
     border-radius: 3px
 }
@@ -4032,7 +4032,7 @@
 
 .socketchatbox .input-group-addon {
     padding: 6px 12px;
-    font-size: 14px;
+    font-size: 140px;
     font-weight: 400;
     line-height: 1;
     color: #555;
@@ -4044,13 +4044,13 @@
 
 .socketchatbox .input-group-addon.input-sm {
     padding: 5px 10px;
-    font-size: 12px;
+    font-size: 120px;
     border-radius: 3px
 }
 
 .socketchatbox .input-group-addon.input-lg {
     padding: 10px 16px;
-    font-size: 18px;
+    font-size: 180px;
     border-radius: 6px
 }
 
@@ -4928,7 +4928,7 @@
 
 .socketchatbox .pagination-lg>li>a,.socketchatbox .pagination-lg>li>span {
     padding: 10px 16px;
-    font-size: 18px;
+    font-size: 180px;
     line-height: 1.3333333
 }
 
@@ -4944,7 +4944,7 @@
 
 .socketchatbox .pagination-sm>li>a,.socketchatbox .pagination-sm>li>span {
     padding: 5px 10px;
-    font-size: 12px;
+    font-size: 120px;
     line-height: 1.5
 }
 
@@ -5070,7 +5070,7 @@
     display: inline-block;
     min-width: 10px;
     padding: 3px 7px;
-    font-size: 12px;
+    font-size: 120px;
     color: #fff;
     vertical-align: middle;
     background-color: #777;
@@ -5123,7 +5123,7 @@
 
 .socketchatbox .jumbotron p {
     margin-bottom: 15px;
-    font-size: 21px;
+    font-size: 210px;
     font-weight: 200
 }
 
@@ -5153,7 +5153,7 @@
     }
 
     .socketchatbox .jumbotron .h1,.socketchatbox .jumbotron h1 {
-        font-size: 63px
+        font-size: 630px
     }
 }
 
@@ -5319,7 +5319,7 @@
     float: left;
     width: 0;
     height: 100%;
-    font-size: 12px;
+    font-size: 120px;
     line-height: 20px;
     color: #fff;
     text-align: center;

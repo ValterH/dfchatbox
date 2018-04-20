@@ -6,7 +6,11 @@ $(document).ready(function(){
     //localStorage.removeItem("sessionID");
     //session_isValid();
     $("#socketchatbox-sendFileBtn").css("background","#9a969a");
-    $(".arrow-right").css("border-left","25px solid #bcbabb")
+    $(".arrow-right").css("border-left","2em solid #bcbabb")
+    $("#inputField").focus();
+    setTimeout(function() {
+         reload_session_storage();
+    }, 100);
     //console.log("SESSION ID: " + localStorage.getItem("sessionID"));
 });
 
@@ -15,15 +19,15 @@ $(".socketchatbox-page").keydown(function(t){
 
     if (message == "") {
         $("#socketchatbox-sendFileBtn").css("background","#9a969a");
-        $(".arrow-right").css("border-left","25px solid #bcbabb");
+        $(".arrow-right").css("border-left","2em solid #bcbabb");
     }
     if (!message.replace(/\s/g, '').length) {
         $("#socketchatbox-sendFileBtn").css("background","#9a969a");
-        $(".arrow-right").css("border-left","25px solid #bcbabb");
+        $(".arrow-right").css("border-left","2em solid #bcbabb");
     }
     else {
         $("#socketchatbox-sendFileBtn").css("background","#4DACFF");
-        $(".arrow-right").css("border-left","25px solid #80DFFF");
+        $(".arrow-right").css("border-left","2em solid #80DFFF");
     }
 });
 
@@ -103,13 +107,13 @@ function disable_input(start) {
     if (start) {
         $("#inputField").prop('disabled', true);
         $("#socketchatbox-sendFileBtn").css("background","#9a969a");
-        $(".arrow-right").css("border-left","25px solid #bcbabb");
+        $(".arrow-right").css("border-left","2em solid #bcbabb");
         $(".socketchatbox-inputMessage").css("border","1px solid #9a969a");
     }
     else {
         $("#inputField").prop('disabled', false);
         $("#socketchatbox-sendFileBtn").css("background","#4DACFF");
-        $(".arrow-right").css("border-left","25px solid #80DFFF");
+        $(".arrow-right").css("border-left","2em solid #80DFFF");
         $(".socketchatbox-inputMessage").css("border","1px solid #4DACFF");
     }
 };
@@ -266,7 +270,7 @@ function communicate(message,j){
                     var oldDateFormat = new Date(data[k]['date']);
                     data[k]['date'] = oldDateFormat.toLocaleDateString();
 
-                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:200px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
+                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:100%;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
 
                     //$(".socketchatbox-chatArea").append( '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:200px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others"></span></div></div>');
 
@@ -297,7 +301,7 @@ function communicate(message,j){
                     var oldDateFormat = new Date(data[k]['date']);
                     data[k]['date'] = oldDateFormat.toLocaleDateString();
 
-                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
+                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:100%;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
 
 
                     for (var l = 0; l < keys.length; l++) {
@@ -353,7 +357,7 @@ function communicate(message,j){
                 var oldDateFormat = new Date(data['dateofbirth']);
                 data['dateofbirth'] = oldDateFormat.toLocaleDateString();
 
-                reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:2%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
+                reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:2%;width:100%;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
 
                 //$(".socketchatbox-chatArea").append( '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:2%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others"></span></div></div>');
 
@@ -423,24 +427,24 @@ function communicate(message,j){
 };
 
 //SHOWS AND HIDES CHATBOX
-$("#socketchatbox-top").click(function(){
-    if ($("#socketchatbox-body").is(":visible")){
-        $("#socketchatbox-showHideChatbox").text("↑");
-    }
-    else {
-        $("#socketchatbox-showHideChatbox").text("↓");
-        //LOAD SESSION STORAGE IF PAGE REFRESHED
+// $("#socketchatbox-top").click(function(){
+//     if ($("#socketchatbox-body").is(":visible")){
+//         $("#socketchatbox-showHideChatbox").text("↑");
+//     }
+//     else {
+//         $("#socketchatbox-showHideChatbox").text("↓");
+//         //LOAD SESSION STORAGE IF PAGE REFRESHED
         
-    }
+//     }
 
-    $("#socketchatbox-body").toggle();
+//     $("#socketchatbox-body").toggle();
 
-    setTimeout(function() {
-        reload_session_storage();
-    }, 100);
+//     setTimeout(function() {
+//         reload_session_storage();
+//     }, 100);
 
-    $("#inputField").focus();
-});
+//     $("#inputField").focus();
+// });
 
 //PROCESSES DATA FROM INPUT FIELD WHEN USER CLICKS ENTER
 $(".socketchatbox-page").keydown(function(t){
@@ -500,42 +504,42 @@ $(document).on("click", ".choice_btn", function(){
 });
 
 //BOX RESIZING
-var a = -1
-  , i = -1
-  , s = null;
+// var a = -1
+//   , i = -1
+//   , s = null;
 
-$(".socketchatbox-resize").mousedown(function(event) {
-    a = event.clientX; 
-    i = event.clientY; 
-    s = $(this).attr("id"),
-    event.preventDefault(),
-    event.stopPropagation()
-});
+// $(".socketchatbox-resize").mousedown(function(event) {
+//     a = event.clientX; 
+//     i = event.clientY; 
+//     s = $(this).attr("id"),
+//     event.preventDefault(),
+//     event.stopPropagation()
+// });
 
-$(document).mousemove(function(event) {
-    if (-1 != a) {
-        var t = $("#socketchatbox-body").outerWidth()
-          , o = $("#socketchatbox-body").outerHeight()
-          , c = event.clientX - a
-          , r = event.clientY - i;
-        s.indexOf("n") > -1 && (o -= r),
-        s.indexOf("w") > -1 && (t -= c),
-        s.indexOf("e") > -1 && (t += c),
-        250 > t && (t = 250),
-        70 > o && (o = 70),
-        $("#socketchatbox-body").css({
-            width: t + "px",
-            height: o + "px"
-        }),
-        a = event.clientX,
-        i = event.clientY
-    }
-});
+// $(document).mousemove(function(event) {
+//     if (-1 != a) {
+//         var t = $("#socketchatbox-body").outerWidth()
+//           , o = $("#socketchatbox-body").outerHeight()
+//           , c = event.clientX - a
+//           , r = event.clientY - i;
+//         s.indexOf("n") > -1 && (o -= r),
+//         s.indexOf("w") > -1 && (t -= c),
+//         s.indexOf("e") > -1 && (t += c),
+//         250 > t && (t = 250),
+//         70 > o && (o = 70),
+//         $("#socketchatbox-body").css({
+//             width: t + "px",
+//             height: o + "px"
+//         }),
+//         a = event.clientX,
+//         i = event.clientY
+//     }
+// });
 
-$(document).mouseup(function() {
-    a = -1,
-    i = -1
-});
+// $(document).mouseup(function() {
+//     a = -1,
+//     i = -1
+// });
 
 //OLD DIALOGFLOW RESPONSE FUNCTION
 
