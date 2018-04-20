@@ -374,7 +374,7 @@ function communicate(message,j){
 
             }
 
-            else if (response_type == "button") {
+            else if (response_type == "procedures") {
                 //DATA GIVES OPTIONS FOR USER
 
                 for (var k = 0; k < data.length; k++) {
