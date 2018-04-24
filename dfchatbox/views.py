@@ -76,6 +76,9 @@ def index(request):
 		    url = answer_json['result']['fulfillment']['data']['url']
 		    if url[:5] != "https":
 		    	url = "https:" + url[5:]
+
+		    if not len(data):
+		    	text_answer = "Za izbrane podatke nisem našel posega."
 		else:
 			if answer_json['status']['code'] != 200:
 				text_answer = "Zgodila se je napaka. Prosim, poskusite ponovno."
