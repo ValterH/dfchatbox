@@ -79,7 +79,7 @@ ul {
 }
 
 #socketchatbox-sendFileBtn {
-  font-size: 25px;
+  font-size: 15px;
   line-height: 50px;
   /*display: none;*/
   height: 100%;
@@ -286,7 +286,7 @@ ul {
 }
 
 .socketchatbox-messageBody-me.hasMedia {
-  border: 1px solid #BBFF00;
+  border: 1px solid #CCE1F5;
   background: #FFFFFF;
 }
 

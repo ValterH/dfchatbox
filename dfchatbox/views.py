@@ -41,9 +41,9 @@ def index(request):
 		#print(message)
 
 		#THINKEHR
-		CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
+		#CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
 		#WAITING LINES
-		#CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3" 
+		CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3" 
 
 		contexts = []
 
@@ -78,6 +78,10 @@ def index(request):
 		    url = answer_json['result']['fulfillment']['data']['url']
 		    if url[:5] != "https":
 		    	url = "https:" + url[5:]
+
+		else:
+			if answer_json['status']['code'] != 200:
+				text_answer = "Zgodila se je napaka. Prosim, poskusite ponovno."
 
 		    
 
