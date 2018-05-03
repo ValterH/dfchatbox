@@ -596,7 +596,7 @@ def getEntryData(answer_json):
 				if counter == number:
 					# json_object['name'] = item['#0']['archetype_details']['template_id']['value']
 					# json_object['value'] = str(counter)
-					json_entries.append(json_object)
+					json_entries.append(item)
 
 	else: 
 		answer = "Prišlo je do napake. Prosim, poskusite ponovno."
