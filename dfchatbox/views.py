@@ -186,11 +186,11 @@ def webhook(request):
 	if parameter_action == "allEntries":
 		print("allEntries")
 		json_response = getAllEntries(answer_json)
+		response_data['ehrid'] = json_response['ehrid']
+		del json_response['ehrid']
 	if parameter_action == "getEntry":
 		print("getEntry")
 		json_response = getEntryData(answer_json)
-		response_data['ehrid'] = json_response['ehrid']
-		del json_response['ehrid']
 
 	answer = json_response['answer']
 	del json_response['answer']
