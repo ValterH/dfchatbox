@@ -13,5 +13,5 @@ app_name = 'dfchatbox'
 urlpatterns = [
         path('',views.index,name='index'),
         path('check_links',views.check_links,name='check_links'),
-        path('webhook',views.webhook,name='webhook')
+        path('webhook',views.webhook,name='webhook'),
         ]

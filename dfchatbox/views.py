@@ -182,7 +182,7 @@ def webhook(request):
 		json_response = getPatientInfoData(answer_json)
 	if parameter_action == "ECGResults":
 		print("ECGResults")
-		json_response = getECGResultsData(answer_json)ž
+		json_response = getECGResultsData(answer_json)
 	if parameter_action == "allEntries":
 		print("allEntries")
 		json_response = getAllEntries(answer_json)
