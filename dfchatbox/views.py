@@ -499,26 +499,26 @@ def getAllEntries(answer_json):
 	if parameter_ehrid != "":
 		ehrId = str(parameter_ehrid)
 
-		if ehrId != '':
-			aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
+	if ehrId != '':
+		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
 
-			queryUrl = baseUrl + aql
+		queryUrl = baseUrl + aql
 
-			r = requests.get(queryUrl, headers={"Authorization": authorization,'content-type': 'application/json'})
+		r = requests.get(queryUrl, headers={"Authorization": authorization,'content-type': 'application/json'})
 
-			js = json.loads(r.text)
-			js = js['resultSet']
+		js = json.loads(r.text)
+		js = js['resultSet']
 
-			if not len(js):
-				answer = "Podani pacient nima vpisov v sistemu."
-			else:
-				answer = "Za podanega pacienta sem našel naslednje vpise v sistemu:"
+		if not len(js):
+			answer = "Podani pacient nima vpisov v sistemu."
+		else:
+			answer = "Za podanega pacienta sem našel naslednje vpise v sistemu:"
 
-				for item in js:
-					json_object['name'] = item['#0']['archetype_details']['template_id']['value']
-					json_object['value'] = item['#0']['archetype_details']['template_id']['value']
-					json_entries.append(json_object)
-					json_object = {}
+			for item in js:
+				json_object['name'] = item['#0']['archetype_details']['template_id']['value']
+				json_object['value'] = item['#0']['archetype_details']['template_id']['value']
+				json_entries.append(json_object)
+				json_object = {}
 
 	else: 
 		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
