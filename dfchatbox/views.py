@@ -182,8 +182,10 @@ def webhook(request):
 		json_response = getPatientInfoData(answer_json)
 	if parameter_action == "ECGResults":
 		print("ECGResults")
-		json_response = getECGResultsData(answer_json)
-
+		json_response = getECGResultsData(answer_json)ž
+	if parameter_action == "allEntries":
+		print("allEntries")
+		json_response = getAllEntries(answer_json)
 
 	answer = json_response['answer']
 	del json_response['answer']
@@ -457,3 +459,72 @@ def getECGResultsData(answer_json):
 
 	return json_response
 
+def getAllEntries(answer_json)
+	print(answer_json)
+
+	baseUrl = 'https://rest.ehrscape.com/rest/v1'
+	ehrId = ''
+	base = base64.b64encode(b'ales.tavcar@ijs.si:ehrscape4alestavcar')
+	authorization = "Basic " + base.decode()
+
+	# Match the action -> provide correct data
+	parameter_action = answer_json['result']['action']
+	json_response = {"responseType": "button"}
+	searchData = []
+	json_entries = []
+	json_object = {} 
+
+	# Obtain ehrID of patient from name
+	queryUrl = baseUrl + "/demographics/party/query"
+
+	parameter_name =answer_json['result']['parameters']['given-name']
+	parameter_last_name =answer_json['result']['parameters']['last-name']
+
+	if parameter_name != "":
+		searchData.append({"key": "firstNames", "value": parameter_name})
+	if parameter_last_name != "":
+		searchData.append({"key": "lastNames", "value": parameter_last_name})
+
+	r = requests.post(queryUrl, data=json.dumps(searchData), headers={"Authorization": authorization, 'content-type': 'application/json'})
+
+	if r.status_code == 200:
+		js = json.loads(r.text)
+		ehrId = js['parties'][0]['partyAdditionalInfo'][0]['value']
+		print("Found ehrid "+ehrId+" for user "+parameter_name+" "+parameter_last_name)
+		answ_part = "Za pacienta "+parameter_name+" "+parameter_last_name
+
+	#Use provided ehrid
+	parameter_ehrid =answer_json['result']['parameters']['ehrid']
+
+	if parameter_ehrid != "":
+		ehrId = str(parameter_ehrid)
+
+		if ehrId != '':
+			aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
+
+			queryUrl = baseUrl + aql
+
+			r = requests.get(queryUrl, headers={"Authorization": authorization,'content-type': 'application/json'})
+
+			js = json.loads(r.text)
+			js = js['resultSet']
+
+			if not len(js):
+				answer = "Podani pacient nima vpisov v sistemu."
+			else:
+				answer = "Za podanega pacienta sem našel naslednje vpise v sistemu:"
+
+				for item in js:
+					json_object['name'] = item['#0']['archetype_details']['template_id']['value']
+					json_object['value'] = item['#0']['archetype_details']['template_id']['value']
+					json_lab_results.append(json_object)
+					json_object = {}
+
+	else: 
+		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
+	# Generate the JSON response
+	json_response['answer'] = answer
+	json_response['data'] = json_lab_results
+	json_response['url'] = "http://www.rtvslo.si"
+
+	return json_response
