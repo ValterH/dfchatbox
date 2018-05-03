@@ -555,8 +555,8 @@ def getEntryData(answer_json):
 
 	queryUrl = baseUrl + "/demographics/party/query"
 
-	parameter_name =answer_json['result']['contexts'][0]['given-name']
-	parameter_last_name =answer_json['result']['contexts'][0]['last-name']
+	parameter_name =answer_json['result']['contexts'][0]['parameters']['given-name']
+	parameter_last_name =answer_json['result']['contexts'][0]['parameters']['last-name']
 
 	if parameter_name != "":
 		searchData.append({"key": "firstNames", "value": parameter_name})
