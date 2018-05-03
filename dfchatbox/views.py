@@ -3,6 +3,7 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
 from django.core import serializers
+from django.views.decorators.csrf import csrf_exempt
 
 import re
 import imgkit
@@ -15,7 +16,8 @@ from bs4 import BeautifulSoup
 import urllib3
 import apiai
 import requests
-
+import base64
+from datetime import datetime
 
 # Create your views here.
 # -*- coding: utf-8 -*-
@@ -41,9 +43,11 @@ def index(request):
 		#print(message)
 
 		#THINKEHR
-		CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
+		#CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
 		#WAITING LINES
-		#CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3" 
+		#CLIENT_ACCESS_TOKEN = "15bddeda0b5246cba6cd27fcd67576a3"
+		#MyEHR
+		CLIENT_ACCESS_TOKEN = "7f7cb0e7be2e4b83b08b7106485a2078"
 
 		contexts = []
 
@@ -157,8 +161,299 @@ def check_links(request):
 #     else: 
 #         return render(request,'dfchatbox/index.html')
 
+############################################################## WEBHOOK ##################################################################
+
+@csrf_exempt
+def webhook(request):
+
+	answer_json = json.loads(request.body)
+	
+	print("=========== WEBHOOK =============")
+
+	parameter_action = answer_json['result']['action']
+	json_response = {}
+	answer = "Prosim ponovno postavite zahtevo."
+
+	if parameter_action == "labResults":
+		print("labResults")
+		json_response = getLabResultsData(answer_json)
+	if parameter_action == "patientInfo":
+		print("patientInfo")
+		json_response = getPatientInfoData(answer_json)
+	if parameter_action == "ECGResults":
+		print("ECGResults")
+		json_response = getECGResultsData(answer_json)
 
 
-        
-        
-        
+	answer = json_response['answer']
+	del json_response['answer']
+	response_data = {}
+	response_data['speech'] = answer
+	response_data['displayText'] = answer
+	response_data['data'] = json_response
+	response_data['source'] = "thinkEHR"
+	print("=========== END WEBHOOK =============")
+	return HttpResponse(
+			json.dumps(response_data, indent=4),
+			content_type="application/json"
+			)
+
+def getPatientInfoData(answer_json):
+
+	baseUrl = 'https://rest.ehrscape.com/rest/v1'
+	base = base64.b64encode(b'ales.tavcar@ijs.si:ehrscape4alestavcar')
+	authorization = "Basic " + base.decode()
+
+	queryUrl = baseUrl + "/demographics/party/query"
+
+	searchData = []
+	json_response = {"responseType": "userInfo"}
+	json_object = {}
+
+	parameter_name =answer_json['result']['parameters']['given-name']
+	parameter_last_name =answer_json['result']['parameters']['last-name']
+
+	if parameter_name != "":
+		searchData.append({"key": "firstNames", "value": parameter_name})
+	if parameter_last_name != "":
+		searchData.append({"key": "lastNames", "value": parameter_last_name})
+
+	print("queryUrl: ", queryUrl)
+	print("searchData: ", searchData)
+
+	r = requests.post(queryUrl, data=json.dumps(searchData), headers={"Authorization": authorization, 'content-type': 'application/json'})
+
+	if r.status_code == 200:
+		js = json.loads(r.text)
+		json_object["name"] = js['parties'][0]['firstNames']
+		json_object["lastname"] = js['parties'][0]['lastNames']
+		json_object["gender"] = js['parties'][0]['gender']
+		json_object["dateofbirth"] = js['parties'][0]['dateOfBirth']
+
+		answer = "Za podano ime sem našel sledeče podatke."
+	else:
+		answer = "Za podano ime nisem našel ustreznih vnosov."	
+
+
+	json_response['answer'] = answer
+	json_response['data'] = json_object
+	json_response['url'] = "http://www.rtvslo.si"
+
+	return json_response
+
+def getLabResultsData(answer_json):
+	print(answer_json)
+
+	baseUrl = 'https://rest.ehrscape.com/rest/v1'
+	#ehrId = 'd8dcc924-edaf-4df5-8b84-e9e6d0ec590f'
+	ehrId = ''
+	base = base64.b64encode(b'ales.tavcar@ijs.si:ehrscape4alestavcar')
+	authorization = "Basic " + base.decode()
+
+	# Match the action -> provide correct data
+	parameter_action = answer_json['result']['action']
+	json_response = {"responseType": "list"}
+	searchData = []
+	json_lab_results = []
+	json_object = {} 
+
+	# Obtain ehrID of patient from name
+	queryUrl = baseUrl + "/demographics/party/query"
+
+	parameter_name =answer_json['result']['parameters']['given-name']
+	parameter_last_name =answer_json['result']['parameters']['last-name']
+
+	if parameter_name != "":
+		searchData.append({"key": "firstNames", "value": parameter_name})
+	if parameter_last_name != "":
+		searchData.append({"key": "lastNames", "value": parameter_last_name})
+
+	r = requests.post(queryUrl, data=json.dumps(searchData), headers={"Authorization": authorization, 'content-type': 'application/json'})
+
+	if r.status_code == 200:
+		js = json.loads(r.text)
+		ehrId = js['parties'][0]['partyAdditionalInfo'][0]['value']
+		print("Found ehrid "+ehrId+" for user "+parameter_name+" "+parameter_last_name)
+		answ_part = "Za pacienta "+parameter_name+" "+parameter_last_name
+
+	#Use provided ehrid
+	parameter_ehrid =answer_json['result']['parameters']['ehrid']
+	if parameter_ehrid != "":
+		ehrId = str(parameter_ehrid)
+		answ_part = "Za ehrid "+ehrId
+
+	#User wants to see lab results for a specific date or date period.
+	if ehrId != '':
+		parameter_date_range =answer_json['result']['parameters']['date-period']
+		parameter_date =answer_json['result']['parameters']['date']
+		queryUrl = baseUrl + "/view/"+ehrId+"/labs"
+		r = requests.get(queryUrl, headers={"Authorization": authorization})
+		js = json.loads(r.text)
+
+		answer = "Za podan datum ni zabeleženih rezultatov laboratorijskih preiskav."
+		if parameter_date_range != "":
+			dateFrom  = datetime.strptime(parameter_date_range.split("/")[0], '%Y-%M-%d')
+			dateTo  = datetime.strptime(parameter_date_range.split("/")[1], '%Y-%M-%d')
+
+			for lab in js:
+				datetime_object = datetime.strptime(lab['time'].split('T')[0], '%Y-%M-%d')
+				if dateFrom <= datetime_object <= dateTo:
+					print(lab['name']+" = "+lab['name']+" time: "+str(datetime_object))
+					json_object['name'] = lab['name']
+					json_object['value'] = str(lab['value'])+" "+lab['unit']
+					json_object['date'] = str(datetime_object)
+					json_lab_results.append(json_object)
+					json_object = {}
+			if json_lab_results:	
+				answer = answ_part + " in podani casovni okvir sem nasel sledece izvide laboratorijskih preiskav:"
+		elif parameter_date != "":
+			print(parameter_date)
+			dateFrom  = datetime.strptime(parameter_date, '%Y-%M-%d')
+			dateTo  = dateFrom
+			for lab in js:
+				datetime_object = datetime.strptime(lab['time'].split('T')[0], '%Y-%M-%d')
+				if dateFrom <= datetime_object <= dateTo:
+					print(lab['name']+" = "+lab['name']+" time: "+str(datetime_object))
+					json_object['name'] = lab['name']
+					json_object['value'] = str(lab['value'])+" "+lab['unit']
+					json_object['date'] = str(datetime_object)
+					json_lab_results.append(json_object)
+					json_object = {}
+			if json_lab_results:	
+				answer = answ_part + " in podan datum "+str(parameter_date)+" sem nasel sledece laboratorijske izvide:"
+		else:
+			for lab in js:
+				datetime_object = datetime.strptime(lab['time'].split('T')[0], '%Y-%M-%d')
+				json_object['name'] = lab['name']
+				json_object['value'] = str(lab['value'])+" "+lab['unit']
+				json_object['date'] = str(datetime_object)
+				json_lab_results.append(json_object)
+				json_object = {}
+				if json_lab_results:	
+					answer = answ_part + " sem nasel sledece laboratorijske izvide:"
+	else: 
+		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
+	# Generate the JSON response
+	json_response['answer'] = answer
+	json_response['data'] = json_lab_results
+	json_response['url'] = "http://www.rtvslo.si"
+
+	return json_response
+
+def getECGResultsData(answer_json):
+	#print(answer_json)
+
+	baseUrl = 'https://rest.ehrscape.com/rest/v1'
+	ehrId = ''
+	base = base64.b64encode(b'ales.tavcar@ijs.si:ehrscape4alestavcar')
+	authorization = "Basic " + base.decode()
+
+	# Match the action -> provide correct data
+	parameter_action = answer_json['result']['action']
+	json_response = {"responseType": "list"}
+	searchData = []
+	json_lab_results = []
+	json_object = {} 
+
+	# Obtain ehrID of patient from name
+	queryUrl = baseUrl + "/demographics/party/query"
+
+	parameter_name =answer_json['result']['parameters']['given-name']
+	parameter_last_name =answer_json['result']['parameters']['last-name']
+
+	if parameter_name != "":
+		searchData.append({"key": "firstNames", "value": parameter_name})
+	if parameter_last_name != "":
+		searchData.append({"key": "lastNames", "value": parameter_last_name})
+
+	r = requests.post(queryUrl, data=json.dumps(searchData), headers={"Authorization": authorization, 'content-type': 'application/json'})
+
+	if r.status_code == 200:
+		js = json.loads(r.text)
+		ehrId = js['parties'][0]['partyAdditionalInfo'][0]['value']
+		print("Found ehrid "+ehrId+" for user "+parameter_name+" "+parameter_last_name)
+		answ_part = "Za pacienta "+parameter_name+" "+parameter_last_name
+
+	#Use provided ehrid
+	parameter_ehrid =answer_json['result']['parameters']['ehrid']
+	if parameter_ehrid != "":
+		ehrId = str(parameter_ehrid)
+		answ_part = "Za ehrid "+ehrId
+
+	#User wants to see lab results for a specific date or date period.
+	if ehrId != '':
+		parameter_date_range =answer_json['result']['parameters']['date-period']
+		parameter_date =answer_json['result']['parameters']['date']
+
+		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
+
+		queryUrl = baseUrl + aql
+
+		r = requests.get(queryUrl, headers={"Authorization": authorization,'content-type': 'application/json'})
+
+		js = json.loads(r.text)
+		js = js['resultSet']
+
+		answer = "Za podan datum ni zabeleženih rezultatov EKG preiskav."
+
+		if parameter_date_range != "":
+			dateFrom  = datetime.strptime(parameter_date_range.split("/")[0], '%Y-%M-%d')
+			dateTo  = datetime.strptime(parameter_date_range.split("/")[1], '%Y-%M-%d')
+
+			for item in js:
+				if item['#0']['archetype_details']['template_id']['value'] == "Measurement ECG Report":
+					datetime_object = datetime.strptime(item['#0']['context']['start_time']['value'].split('T')[0], '%Y-%M-%d')
+
+					if dateFrom <= datetime_object <= dateTo:
+						#print(lab['name']+" = "+lab['name']+" time: "+str(datetime_object))
+						#json_object['name'] = lab['name']
+						json_object['start_time'] = str(datetime_object)
+						json_object['setting'] = item['#0']['context']['setting']['value']
+						json_lab_results.append(json_object)
+						json_object = {}
+
+			if json_lab_results:	
+				answer = answ_part + " in podani casovni okvir sem nasel sledece izvide EKG preiskav:"
+
+		elif parameter_date != "":
+			print(parameter_date)
+			dateFrom  = datetime.strptime(parameter_date, '%Y-%M-%d')
+			dateTo  = dateFrom
+
+			for item in js:
+				if item['#0']['archetype_details']['template_id']['value'] == "Measurement ECG Report":
+					datetime_object = datetime.strptime(item['#0']['context']['start_time']['value'].split('T')[0], '%Y-%M-%d')
+
+					if dateFrom <= datetime_object <= dateTo:
+						#print(lab['name']+" = "+lab['name']+" time: "+str(datetime_object))
+						#json_object['name'] = lab['name']
+						json_object['start_time'] = str(datetime_object)
+						json_object['setting'] = item['#0']['context']['setting']['value']
+						json_lab_results.append(json_object)
+						json_object = {}
+
+			if json_lab_results:	
+				answer = answ_part + " in podan datum "+str(parameter_date)+" sem nasel sledece EKG izvide:"
+		else:
+			for item in js:
+				if item['#0']['archetype_details']['template_id']['value'] == "Measurement ECG Report":
+					datetime_object = datetime.strptime(item['#0']['context']['start_time']['value'].split('T')[0], '%Y-%M-%d')
+
+					#json_object['name'] = lab['name']
+					json_object['start_time'] = str(datetime_object)
+					json_object['setting'] = item['#0']['context']['setting']['value']
+					json_lab_results.append(json_object)
+					json_object = {}
+
+			if json_lab_results:	
+				answer = answ_part + " sem nasel sledece EKG izvide:"
+	else:
+		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
+
+	# Generate the JSON response
+	json_response['answer'] = answer
+	json_response['data'] = json_lab_results
+	json_response['url'] = "http://www.rtvslo.si"
+
+	return json_response
+
