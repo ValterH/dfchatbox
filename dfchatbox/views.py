@@ -517,14 +517,14 @@ def getAllEntries(answer_json):
 				for item in js:
 					json_object['name'] = item['#0']['archetype_details']['template_id']['value']
 					json_object['value'] = item['#0']['archetype_details']['template_id']['value']
-					json_lab_results.append(json_object)
+					json_entries.append(json_object)
 					json_object = {}
 
 	else: 
 		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
 	# Generate the JSON response
 	json_response['answer'] = answer
-	json_response['data'] = json_lab_results
+	json_response['data'] = json_entries
 	json_response['url'] = "http://www.rtvslo.si"
 
 	return json_response
