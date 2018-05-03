@@ -551,8 +551,7 @@ def getEntryData(answer_json):
 	#json_object = {}
 
 	number = answer_json['result']['contexts'][0]['parameters']['number']
-	ehrId = answer_json['result']['contexts'][0]['parameters']['ehrid.original']
-
+	ehrId = answer_json['result']['fulfillment']['data']['ehrid']
 
 	if ehrId != '':
 		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
