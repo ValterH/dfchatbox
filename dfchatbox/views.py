@@ -459,7 +459,7 @@ def getECGResultsData(answer_json):
 
 	return json_response
 
-def getAllEntries(answer_json)
+def getAllEntries(answer_json):
 	print(answer_json)
 
 	baseUrl = 'https://rest.ehrscape.com/rest/v1'
