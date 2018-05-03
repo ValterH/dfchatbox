@@ -189,6 +189,8 @@ def webhook(request):
 	if parameter_action == "getEntry":
 		print("getEntry")
 		json_response = getEntryData(answer_json)
+		response_data['ehrid'] = json_response['ehrid']
+		del json_response['ehrid']
 
 	answer = json_response['answer']
 	del json_response['answer']
@@ -497,13 +499,13 @@ def getAllEntries(answer_json):
 		answ_part = "Za pacienta "+parameter_name+" "+parameter_last_name
 
 	#Use provided ehrid
-	parameter_ehrid =answer_json['result']['parameters']['ehrid']
+	parameter_ehrid = answer_json['result']['parameters']['ehrid']
 
 	if parameter_ehrid != "":
 		ehrId = str(parameter_ehrid)
 
 	if ehrId != '':
-		answer_json['result']['parameters']['ehrid'] = ehrId
+		json_response['ehrid'] = ehrId
 
 		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
 
@@ -531,6 +533,7 @@ def getAllEntries(answer_json):
 	json_response['answer'] = answer
 	json_response['data'] = json_entries
 	json_response['url'] = "http://www.rtvslo.si"
+
 
 	return json_response
 
