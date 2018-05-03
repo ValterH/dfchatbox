@@ -172,6 +172,7 @@ def webhook(request):
 
 	parameter_action = answer_json['result']['action']
 	json_response = {}
+	response_data = {}
 	answer = "Prosim ponovno postavite zahtevo."
 
 	if parameter_action == "labResults":
@@ -194,7 +195,6 @@ def webhook(request):
 
 	answer = json_response['answer']
 	del json_response['answer']
-	response_data = {}
 	response_data['speech'] = answer
 	response_data['displayText'] = answer
 	response_data['data'] = json_response
