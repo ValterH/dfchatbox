@@ -186,6 +186,9 @@ def webhook(request):
 	if parameter_action == "allEntries":
 		print("allEntries")
 		json_response = getAllEntries(answer_json)
+	if parameter_action == "getEntry":
+		print("getEntry")
+		json_response = getEntryData(answer_json)
 
 	answer = json_response['answer']
 	del json_response['answer']
@@ -500,6 +503,8 @@ def getAllEntries(answer_json):
 		ehrId = str(parameter_ehrid)
 
 	if ehrId != '':
+		answer_json['result']['parameters']['ehrid'] = ehrId
+
 		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
 
 		queryUrl = baseUrl + aql
@@ -514,14 +519,62 @@ def getAllEntries(answer_json):
 		else:
 			answer = "Za podanega pacienta sem našel naslednje vpise v sistemu:"
 
-			for item in js:
+			for counter,item in enumerate(js):
 				json_object['name'] = item['#0']['archetype_details']['template_id']['value']
-				json_object['value'] = item['#0']['archetype_details']['template_id']['value']
+				json_object['value'] = str(counter)
 				json_entries.append(json_object)
 				json_object = {}
 
 	else: 
 		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
+	# Generate the JSON response
+	json_response['answer'] = answer
+	json_response['data'] = json_entries
+	json_response['url'] = "http://www.rtvslo.si"
+
+	return json_response
+
+def getEntryData(answer_json):
+	baseUrl = 'https://rest.ehrscape.com/rest/v1'
+	ehrId = ''
+	base = base64.b64encode(b'ales.tavcar@ijs.si:ehrscape4alestavcar')
+	authorization = "Basic " + base.decode()
+
+	# Match the action -> provide correct data
+	parameter_action = answer_json['result']['action']
+	json_response = {"responseType": "list"}
+	searchData = []
+	json_entries = []
+	#json_object = {}
+
+	number = answer_json['result']['contexts'][0]['parameters']['number']
+	ehrId = answer_json['result']['contexts'][0]['parameters']['ehrid.original']
+
+
+	if ehrId != '':
+		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
+
+		queryUrl = baseUrl + aql
+
+		r = requests.get(queryUrl, headers={"Authorization": authorization,'content-type': 'application/json'})
+
+		js = json.loads(r.text)
+		js = js['resultSet']
+
+		if not len(js):
+			answer = "Podani pacient nima vpisov v sistemu."
+		else:
+			answer = "Našel sem naslednje podatke o vpisu:"
+
+			for counter,item in enumerate(js):
+				if counter == number:
+					# json_object['name'] = item['#0']['archetype_details']['template_id']['value']
+					# json_object['value'] = str(counter)
+					json_entries.append(json_object)
+
+	else: 
+		answer = "Prišlo je do napake. Prosim, poskusite ponovno."
+
 	# Generate the JSON response
 	json_response['answer'] = answer
 	json_response['data'] = json_entries
