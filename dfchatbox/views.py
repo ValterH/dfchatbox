@@ -551,7 +551,31 @@ def getEntryData(answer_json):
 	#json_object = {}
 
 	number = answer_json['result']['contexts'][0]['parameters']['number']
-	ehrId = answer_json['result']['fulfillment']['data']['ehrid']
+	#ehrId = answer_json['result']['fulfillment']['data']['ehrid']
+
+	queryUrl = baseUrl + "/demographics/party/query"
+
+	parameter_name =answer_json['result']['parameters']['given-name']
+	parameter_last_name =answer_json['result']['parameters']['last-name']
+
+	if parameter_name != "":
+		searchData.append({"key": "firstNames", "value": parameter_name})
+	if parameter_last_name != "":
+		searchData.append({"key": "lastNames", "value": parameter_last_name})
+
+	r = requests.post(queryUrl, data=json.dumps(searchData), headers={"Authorization": authorization, 'content-type': 'application/json'})
+
+	if r.status_code == 200:
+		js = json.loads(r.text)
+		ehrId = js['parties'][0]['partyAdditionalInfo'][0]['value']
+		print("Found ehrid "+ehrId+" for user "+parameter_name+" "+parameter_last_name)
+		answ_part = "Za pacienta "+parameter_name+" "+parameter_last_name
+
+	#Use provided ehrid
+	parameter_ehrid = answer_json['result']['parameters']['ehrid']
+
+	if parameter_ehrid != "":
+		ehrId = str(parameter_ehrid)
 
 	if ehrId != '':
 		aql = "/query?aql=select a from EHR e[ehr_id/value='{}'] contains COMPOSITION a".format(ehrId)
