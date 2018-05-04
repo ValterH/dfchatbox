@@ -589,14 +589,28 @@ def getEntryData(answer_json):
 
 		if not len(js):
 			answer = "Podani pacient nima vpisov v sistemu."
+		elif number >= len(js):
+			answer = "Izbrani vpis ne obstaja."
 		else:
 			answer = "Našel sem naslednje podatke o vpisu:"
 
 			for counter,item in enumerate(js):
 				if counter == number:
-					# json_object['name'] = item['#0']['archetype_details']['template_id']['value']
-					# json_object['value'] = str(counter)
-					json_entries.append(item)
+					uid = item[0]['#0']['uid']['value']
+
+					queryUrl = baseUrl + "/composition/"
+
+					queryUrl += uid
+
+					r = requests.get(queryUrl, headers={"Authorization": authorization, 'content-type': 'application/json'})
+
+					if r.status_code == 200:
+						json_entries = json.loads(r.text)
+
+					else:
+						answer = "Prišlo je do napake. Prosim, poskusite ponovno."
+
+
 
 	else: 
 		answer = "Prišlo je do napake. Prosim, poskusite ponovno."
