@@ -529,6 +529,7 @@ def getAllEntries(answer_json):
 
 	else: 
 		answer = "Za podanega pacienta nisem nasel podatkov v sistemu."
+		json_response['ehrid'] = ehrId
 	# Generate the JSON response
 	json_response['answer'] = answer
 	json_response['data'] = json_entries
@@ -596,7 +597,7 @@ def getEntryData(answer_json):
 
 			for counter,item in enumerate(js):
 				if counter == number:
-					uid = item[0]['#0']['uid']['value']
+					uid = item['#0']['uid']['value']
 
 					queryUrl = baseUrl + "/composition/"
 
