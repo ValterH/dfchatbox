@@ -589,7 +589,7 @@ def getEntryData(answer_json):
 
 		if not len(js):
 			answer = "Podani pacient nima vpisov v sistemu."
-		elif number >= len(js):
+		elif int(number) >= len(js):
 			answer = "Izbrani vpis ne obstaja."
 		else:
 			answer = "Našel sem naslednje podatke o vpisu:"
