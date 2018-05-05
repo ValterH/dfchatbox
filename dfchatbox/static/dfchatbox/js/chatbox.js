@@ -259,6 +259,8 @@ function communicate(message,j){
 
             if (response_type == "list") {
                 //DATA IS LIST OF JSON OBJECTS
+                console.log(data.length);
+                console.log(data[0]);
                 for (var k = 0; k < data.length; k++) {
                     var keys = Object.keys(data[k]);
                     var slo_keys = ["Datum","Ime","Vrednost"];

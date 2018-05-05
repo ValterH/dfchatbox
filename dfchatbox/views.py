@@ -610,9 +610,11 @@ def getEntryData(answer_json):
 					if r.status_code == 200:
 						json_entries = json.loads(r.text)['composition']
 						print(json_entries)
+						break
 
 					else:
 						answer = "Prišlo je do napake. Prosim, poskusite ponovno."
+						break
 
 
 	else: 
