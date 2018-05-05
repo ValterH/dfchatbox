@@ -597,6 +597,7 @@ def getEntryData(answer_json):
 			answer = "Našel sem naslednje podatke o vpisu:"
 
 			for counter,item in enumerate(js):
+				print(counter,number)
 				if counter == number:
 					uid = item['#0']['uid']['value']
 
@@ -608,10 +609,10 @@ def getEntryData(answer_json):
 
 					if r.status_code == 200:
 						json_entries = json.loads(r.text)['composition']
+						print(json_entries)
 
 					else:
 						answer = "Prišlo je do napake. Prosim, poskusite ponovno."
-
 
 
 	else: 
