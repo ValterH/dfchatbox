@@ -253,7 +253,7 @@ function communicate(message,j){
             // }
             //*************************************************************************** USER OPTION BUTTONS ***********************************************************************************************
 
-
+            console.log(response['data']);
             data = JSON.parse(response['data'].replace(/'/g, '"'));
             response_type = response['response_type'];
 
