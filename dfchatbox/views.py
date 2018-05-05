@@ -192,6 +192,7 @@ def webhook(request):
 	if parameter_action == "getEntry":
 		print("getEntry")
 		json_response = getEntryData(answer_json)
+		print(json_response)
 
 	answer = json_response['answer']
 	del json_response['answer']
@@ -606,7 +607,7 @@ def getEntryData(answer_json):
 					r = requests.get(queryUrl, headers={"Authorization": authorization, 'content-type': 'application/json'})
 
 					if r.status_code == 200:
-						json_entries = json.loads(r.text)
+						json_entries = json.loads(r.text)['composition']
 
 					else:
 						answer = "Prišlo je do napake. Prosim, poskusite ponovno."
