@@ -598,7 +598,7 @@ def getEntryData(answer_json):
 
 			for counter,item in enumerate(js):
 				print(counter,number)
-				if counter == number:
+				if counter == int(number):
 					uid = item['#0']['uid']['value']
 
 					queryUrl = baseUrl + "/composition/"
