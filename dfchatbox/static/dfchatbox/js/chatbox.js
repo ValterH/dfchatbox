@@ -292,8 +292,9 @@ function communicate(message,j){
 
             else if (response_type == "entry") {
                 //DATA IS DICTIONARY
-                console.log(data.length);
+                console.log("entry");
                 var keys = Object.keys(data);
+                console.log(keys);
 
                 for (var k = 0; k < keys.length; k++) {
 
