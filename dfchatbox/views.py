@@ -608,7 +608,7 @@ def getEntryData(answer_json):
 					r = requests.get(queryUrl, headers={"Authorization": authorization, 'content-type': 'application/json'})
 
 					if r.status_code == 200:
-						json_entries = json.loads(r.text)['composition']
+						json_entries = list(json.loads(r.text)['composition'])
 						print(json_entries)
 						break
 
