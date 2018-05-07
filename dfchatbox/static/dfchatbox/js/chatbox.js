@@ -290,6 +290,31 @@ function communicate(message,j){
                 $("#inputField").focus();
             }
 
+            else if (response_type == "entry") {
+                //DATA IS DICTIONARY
+                console.log(data.length);
+                var keys = Object.keys(data);
+
+                for (var k = 0; k < keys.length; k++) {
+
+                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:200px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
+
+                    reply_others += keys[k] + ": " + data[keys[k]] + "<br>";
+
+
+                    reply_others += '</span></div></div>';
+
+                    $(".socketchatbox-chatArea").append(reply_others);
+
+                    saveElement(reply_others);
+
+                    i+=1;
+                }
+                disable_input(false);
+
+                $("#inputField").focus();
+            }
+
             else if (response_type == "waitingTimes") {
                     //DATA IS LIST OF JSON OBJECTS
                     for (var k = 0; k < data.length; k++) {

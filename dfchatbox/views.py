@@ -547,7 +547,7 @@ def getEntryData(answer_json):
 
 	# Match the action -> provide correct data
 	parameter_action = answer_json['result']['action']
-	json_response = {"responseType": "list"}
+	json_response = {"responseType": "entry"}
 	searchData = []
 	json_entries = []
 	#json_object = {}
@@ -608,7 +608,7 @@ def getEntryData(answer_json):
 					r = requests.get(queryUrl, headers={"Authorization": authorization, 'content-type': 'application/json'})
 
 					if r.status_code == 200:
-						json_entries.append(json.loads(r.text)['composition'])
+						json_entries = json.loads(r.text)['composition']
 						print(json_entries)
 						break
 
