@@ -135,6 +135,11 @@ def check_links(request):
 		else:
 			return HttpResponse(urls)
 
+@require_http_methods(['GET'])
+def entry_tree(request,data):
+	return render(request,'dfchatbox/tree.html',{data:data})
+
+
 #stara metoda za komunikacijo z dialogflowom
 
 # @require_http_methods(['POST','GET'])
@@ -594,7 +599,7 @@ def getEntryData(answer_json):
 		elif int(number) >= len(js):
 			answer = "Izbrani vpis ne obstaja."
 		else:
-			answer = "Našel sem naslednje podatke o vpisu:"
+			answer = "Našel sem podatke o vpisu."
 
 			for counter,item in enumerate(js):
 				print(counter,number)
@@ -610,6 +615,7 @@ def getEntryData(answer_json):
 					if r.status_code == 200:
 						json_entries = json.loads(r.text)['composition']
 						print(json_entries)
+						json_response['tree_url'] = "/entry_tree/{}".format(str(data))
 						break
 
 					else:
@@ -623,6 +629,5 @@ def getEntryData(answer_json):
 	# Generate the JSON response
 	json_response['answer'] = answer
 	json_response['data'] = json_entries
-	json_response['url'] = "http://www.rtvslo.si"
 
 	return json_response

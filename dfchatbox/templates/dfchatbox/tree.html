@@ -1,0 +1,32 @@
+{% load staticfiles %} 
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <title>Drevo vpisa</title>
+        <link rel="stylesheet" href="{% static 'dfchatbox/css/jqtree.css' %}">
+    </head>
+
+    <body>
+      <div id="tree1"></div>
+    </body>
+
+    <script type="text/javascript">
+      var data = {{ data }};
+      console.log(typeof(data));
+      data = JSON.parse(data);
+
+      $(function() {
+            $('#tree1').tree({
+                data: parseTree(data),
+            });
+        });
+    </script>
+
+    <script src="{% static 'dfchatbox/js/jquery-2.2.1.min.js' %}"></script>
+    <script src="{% static 'dfchatbox/js/tree.jquery.js' %}"></script>
+    <script src="{% static 'dfchatbox/js/treeparser.js' %}"></script>
+
+</html>
