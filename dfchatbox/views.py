@@ -45,7 +45,7 @@ def index(request):
 			message = translation
 
 		print("message:",message)
-		if not hasNumbers(message):
+		if not hasNumbers(message) and message.find("NONE") < 0:
 			if checkRegion(message):
 				whoosh_data = whoosh(message)
 				if len(whoosh_data) > 1:
@@ -647,11 +647,12 @@ def getEntryData(answer_json):
 def update_db(request):
 	url = "https://cakalnedobe.ezdrav.si/Home/GetProcedures"
 	procedures = json.loads(requests.get(url).text)
+	print (len(procedures))
 	Procedure.objects.all().delete()
 	print(len(Procedure.objects.all()))
 	for procedure in procedures:
 		nameSLO=edit(procedure['Name'])
-		nameENG=standardize(translate(nameSLO.lower()))
+		nameENG=translate(nameSLO).lower()
 		pid=procedure['Id']
 		#print(nameSLO)
 		#print(nameENG)
@@ -678,19 +679,34 @@ def translate(input):
 		return input
 	return req.text[1:-3]
 
-def standardize(input): # TO DO
-	if input.find('operation') > 0:
-		input.replace('operation','surgery')
+#FOR TESTING ONLY TO TRANSFER INTO DB
+def standardize_input(input):
+	if input.find('arm') > -1:
+		input = input.replace('arm', 'hand')
+	return input
+
+def standardize_db(procedures):
+	#SURGERY
+	operations = procedures.filter(nameENG__icontains = "operation")|procedures.filter(nameENG__icontains = "surgerys")
+	for procedure in operations:
+		name = procedure.nameENG
+		print (name)
+		name = name.replace("operation","surgery").replace("operations","surgery").replace("surgerys","surgery")
+		print(name)
+		procedure.nameENG=name
+		procedure.save()
 	return
 
 def whoosh(input):
 	#ZA QUERY PO VEC BESEDAH
+	input = standardize_input(input)
 	keywords = getKeywords(input)
 	all_results = SearchQuerySet().all()
 	data = []
 	if keywords:
 		for keyword in keywords:
-			all_results=all_results.filter(content=keyword)
+			all_results |= all_results.filter(content=keyword)
+
 		for result in all_results:
 			dict ={}
 			dict['name']=result.object.nameSLO
@@ -698,7 +714,7 @@ def whoosh(input):
 			data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']=input
+	none['value']=input + " NONE"
 	data.append(none)
 
 	return data
