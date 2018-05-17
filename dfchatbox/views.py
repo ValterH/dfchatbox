@@ -19,6 +19,10 @@ import requests
 import base64
 from datetime import datetime
 
+# whoosh
+from dfchatbox.models import Procedure
+from haystack.query import SearchQuerySet
+
 # Create your views here.
 # -*- coding: utf-8 -*-
 
@@ -39,6 +43,13 @@ def index(request):
 
 		if translation != "":
 			message = translation
+
+		print("message:",message)
+		if not hasNumbers(message):
+			if checkRegion(message):
+				whoosh_data = whoosh(message)
+				if len(whoosh_data) > 1:
+					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format("Ste mislili:","procedures",whoosh_data,url))
 
 		#print(message)
 
@@ -85,7 +96,7 @@ def index(request):
 
 		    
 
-		print("data: ",data)
+		#print("data: ",data)
 
 		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 	else:
@@ -631,3 +642,86 @@ def getEntryData(answer_json):
 	json_response['data'] = json_entries
 
 	return json_response
+
+@require_http_methods(['GET'])
+def update_db(request):
+	url = "https://cakalnedobe.ezdrav.si/Home/GetProcedures"
+	procedures = json.loads(requests.get(url).text)
+	Procedure.objects.all().delete()
+	print(len(Procedure.objects.all()))
+	for procedure in procedures:
+		nameSLO=edit(procedure['Name'])
+		nameENG=standardize(translate(nameSLO.lower()))
+		pid=procedure['Id']
+		#print(nameSLO)
+		#print(nameENG)
+		#print()
+		new_procedure=Procedure(nameENG=nameENG, nameSLO=nameSLO, procedure_id=pid)
+		new_procedure.save()
+		print(len(Procedure.objects.all()))
+	return HttpResponse('Database Updated')
+
+def edit(input):
+	return input.replace(",","").replace("("," ").replace(")"," ").replace("-"," ").replace("/"," ")
+
+def translate(input):
+	url = "http://translate.dis-apps.ijs.si/translate?sentence="+input
+	req = requests.get(url)
+	if req.text == '{"errors": {"sentence": "Invalid text value provided"}}' or req.text[1:-3] == '':
+		output=""
+		words=input.split(" ")
+		if(len(words)>1):
+			for word in words:
+				if word:
+					output+=translate(word)+" "
+			return output
+		return input
+	return req.text[1:-3]
+
+def standardize(input): # TO DO
+	if input.find('operation') > 0:
+		input.replace('operation','surgery')
+	return
+
+def whoosh(input):
+	#ZA QUERY PO VEC BESEDAH
+	keywords = getKeywords(input)
+	all_results = SearchQuerySet().all()
+	data = []
+	if keywords:
+		for keyword in keywords:
+			all_results=all_results.filter(content=keyword)
+		for result in all_results:
+			dict ={}
+			dict['name']=result.object.nameSLO
+			dict['value']=input + " " + result.object.procedure_id
+			data.append(dict)
+	none={}
+	none['name']="Nobeden izmed zgoraj naštetih"
+	none['value']=input
+	data.append(none)
+
+	return data
+
+def getKeywords(input):
+	words = input.split(' ')
+	keywords = []
+	for keyword in words:
+		if not keyword:
+			continue
+		if(SearchQuerySet().filter(content=keyword).count() > 0):
+			keywords.append(keyword)
+	print("keywords:",keywords)
+	return keywords
+
+def hasNumbers(inputString):
+	return any(char.isdigit() for char in inputString)
+
+def checkRegion(message):
+	if message.find('regions') > 0:
+		message = message.replace('regions','')
+		data = whoosh(message)
+		if len(data) > 1:
+			return True
+		return False
+	return True

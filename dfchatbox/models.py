@@ -1,3 +1,6 @@
 from django.db import models
 
-# Create your models here.
+class Procedure(models.Model):
+    nameENG = models.CharField(max_length=500)
+    nameSLO = models.CharField(max_length=500)
+    procedure_id = models.CharField(max_length=10)
