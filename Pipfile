@@ -23,8 +23,8 @@ Django = "==2.0.4"
 Pillow = "==5.1.0"
 SpeechRecognition = "==3.7.1"
 whitenoise = "*"
-haystack==2.5.0
-whoosh==2.7.4
+haystack= "==2.5.0"
+whoosh= "==2.7.4"
 
 [dev-packages]
 
