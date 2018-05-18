@@ -716,6 +716,7 @@ def whoosh(input):
 			dict['name']=result.object.nameSLO
 			dict['value']=input + " " + result.object.procedure_id
 			data.append(dict)
+			#print(result.score)
 		none={}
 		none['name']="Nobeden izmed zgoraj naštetih"
 		none['value']=input + " NONE"
@@ -747,6 +748,8 @@ def checkRegion(message):
 	return True
 
 def query(set,keywords):
+	if len(keywords) == 1:
+		return set.filter(content=keywords[0])
 	pairs = pair(keywords)
 	result = set
 	for p in pairs:

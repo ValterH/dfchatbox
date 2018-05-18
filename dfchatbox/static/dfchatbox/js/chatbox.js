@@ -256,7 +256,6 @@ function communicate(message,j){
             console.log(response['data']);
             data = JSON.parse(response['data'].replace(/'/g, '"'));
             response_type = response['response_type'];
-
             if (response_type == "list") {
                 //DATA IS LIST OF JSON OBJECTS
                 console.log(data.length);
@@ -319,12 +318,12 @@ function communicate(message,j){
 
                 $("#inputField").focus();
             }
-
+            
             else if (response_type == "waitingTimes") {
                     //DATA IS LIST OF JSON OBJECTS
                     for (var k = 0; k < data.length; k++) {
-                    var keys = Object.keys(data[k]);
-                    var slo_keys = ["Bolnišnica","Telefon","E-mail","Sprejem"];
+                    var keys = ["hospital","reception","email","phone"]
+                    var slo_keys = ["Bolnišnica","Sprejem","E-mail","Telefon"];
 
                     var oldDateFormat = new Date(data[k]['date']);
                     data[k]['date'] = oldDateFormat.toLocaleDateString();
@@ -338,13 +337,15 @@ function communicate(message,j){
                             reception = data[k][keys[l]];
                             //reception = JSON.parse(data[k][keys[l]]);
 
-                            reception_keys = Object.keys(reception);
-
-                            if (reception[reception_keys[1]] == 1){
-                                reply_others += reception[reception_keys[0]] + "<br>" + "(čez " + reception[reception_keys[1]] + " dan)";
+                            reception_keys = ["availability", "days_to"];
+                            if (isNaN(reception[reception_keys[1]])){
+                                reply_others += reception[reception_keys[0]] + "<br>";
+                            }
+                            else if (reception[reception_keys[1]] == 1){
+                                reply_others += reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dan)" + "<br>";
                             }
                             else {
-                                reply_others += reception[reception_keys[0]] + "<br>" + "(čez " + reception[reception_keys[1]] + " dni)";
+                                reply_others += reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dni)" + "<br>";
                             }
 
                             // for (var m = 0; m < reception_keys.length; m++) {
@@ -361,12 +362,13 @@ function communicate(message,j){
                     $(".socketchatbox-chatArea").append(reply_others);
 
                     saveElement(reply_others);
-
+                    last = "" + j + i;
                     i+=1;
                 }
                 disable_input(false);
-
+                console.log("wrapper" + last);
                 $("#inputField").focus();
+                document.getElementById("wrapper" + last).scrollIntoView({behavior: "smooth"});
             }
 
             else if (response_type == "userInfo") {
@@ -412,19 +414,21 @@ function communicate(message,j){
 
             else if (response_type == "procedures") {
                 //DATA GIVES OPTIONS FOR USER
+                first = i.toString() + j.toString();
                 for (var k = 0; k < data.length; k++) {
                     $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
                     i += 1;
                 }
 
-                document.getElementById("btn" + (i-1) + j).scrollIntoView({behavior: "smooth"});
+                //document.getElementById("btn" + first).scrollIntoView({behavior: "smooth"});
+                document.getElementById("wrapper-others" + j).scrollIntoView({behavior: "smooth"});
             }
 
 
            
         }
         catch(err) {
-            //console.log(err);
+            console.log(err);
             //DIALOGFLOW RESPONSE DOES NOT CONTAIN DATA
             try {
                 //return
@@ -433,7 +437,7 @@ function communicate(message,j){
             }
 
             typing(0,"others");
-
+            console.log(err);
             var reply_others = '<div class="socketchatbox-message-wrapper" id="wrapper-others' + j + '"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime">' + date + '</span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">' + response['text_answer'] +  '</span></div></div>';
 
             $(".socketchatbox-chatArea").append(reply_others);
