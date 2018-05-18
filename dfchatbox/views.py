@@ -34,22 +34,25 @@ def index(request):
 
 		print("*****SESSION ID*****   ",sessionID)
 
+		message=translate(message)
+
 		#print("user input: ", message)
 
-		url = "http://translate.dis-apps.ijs.si/translate?sentence=" + message
+		# url = "http://translate.dis-apps.ijs.si/translate?sentence=" + message
 
-		response = requests.get(url)
-		translation = response.text[1:-3]
+		# response = requests.get(url)
+		# translation = response.text[1:-3]
 
-		if translation != "":
-			message = translation
+		# if translation != "":
+		# 	message = translation
 
 		print("message:",message)
 		if not hasNumbers(message) and message.find("NONE") < 0:
 			if checkRegion(message):
 				whoosh_data = whoosh(message)
+				print(whoosh_data)
 				if len(whoosh_data) > 1:
-					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format("Ste mislili:","procedures",whoosh_data,url))
+					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
 
 		#print(message)
 
@@ -673,49 +676,50 @@ def translate(input):
 		words=input.split(" ")
 		if(len(words)>1):
 			for word in words:
+				print(word)
+				word=word.replace('rad','like to')
+				print(word)
 				if word:
 					output+=translate(word)+" "
 			return output
 		return input
 	return req.text[1:-3]
 
-#FOR TESTING ONLY TO TRANSFER INTO DB
+#FOR TESTING ONLY 
+# TODO: TRANSFER INTO DB
 def standardize_input(input):
-	if input.find('arm') > -1:
-		input = input.replace('arm', 'hand')
-	return input
+	input = input.lower()
+	return input.replace('arm', 'hand').replace('operation','surgery').replace("'"," ").replace("x-ray","rtg")
 
 def standardize_db(procedures):
-	#SURGERY
-	operations = procedures.filter(nameENG__icontains = "operation")|procedures.filter(nameENG__icontains = "surgerys")
-	for procedure in operations:
+	for procedure in procedures:
 		name = procedure.nameENG
 		print (name)
-		name = name.replace("operation","surgery").replace("operations","surgery").replace("surgerys","surgery")
+		name = name.replace("operation","surgery").replace("operations","surgery").replace("surgerys","surgery").replace('need','needs')
 		print(name)
 		procedure.nameENG=name
 		procedure.save()
 	return
 
 def whoosh(input):
-	#ZA QUERY PO VEC BESEDAH
 	input = standardize_input(input)
 	keywords = getKeywords(input)
 	all_results = SearchQuerySet().all()
 	data = []
 	if keywords:
-		for keyword in keywords:
-			all_results |= all_results.filter(content=keyword)
+		all_results = query(all_results, keywords)
+		# for keyword in keywords:
+		# 	all_results = all_results.filter(content=keyword)
 
 		for result in all_results:
 			dict ={}
 			dict['name']=result.object.nameSLO
 			dict['value']=input + " " + result.object.procedure_id
 			data.append(dict)
-	none={}
-	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']=input + " NONE"
-	data.append(none)
+		none={}
+		none['name']="Nobeden izmed zgoraj naštetih"
+		none['value']=input + " NONE"
+		data.append(none)
 
 	return data
 
@@ -734,10 +738,27 @@ def hasNumbers(inputString):
 	return any(char.isdigit() for char in inputString)
 
 def checkRegion(message):
-	if message.find('regions') > 0:
+	if message.find('regions') > -1:
 		message = message.replace('regions','')
 		data = whoosh(message)
 		if len(data) > 1:
 			return True
 		return False
 	return True
+
+def query(set,keywords):
+	pairs = pair(keywords)
+	result = set
+	for p in pairs:
+		new_set = set.filter(content=p[0]).filter(content=p[1])
+		result |= new_set
+	return result
+
+def pair(list):
+	result = []
+	for item in list:
+		for item2 in list:
+			if list.index(item) > list.index(item2):
+				result.append([item,item2])
+	return result
+

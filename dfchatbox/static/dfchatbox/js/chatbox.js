@@ -412,7 +412,6 @@ function communicate(message,j){
 
             else if (response_type == "procedures") {
                 //DATA GIVES OPTIONS FOR USER
-
                 for (var k = 0; k < data.length; k++) {
                     $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
                     i += 1;
