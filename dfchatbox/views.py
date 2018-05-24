@@ -99,7 +99,16 @@ def index(request):
 
 		    
 
-		#print("data: ",data)
+		#TODO: storitev ni na voljo se 2x izpise
+		if text_answer == "Kako hitro potrebujete poseg?":
+			print("A")
+			urgencies = [{"name":"Zelo hitro","value":"Very fast"},{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"}]
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Kako hitro potrebujete poseg?","procedures",urgencies))
+
+		if text_answer == "V kateri regiji iščete?":
+			print("A")
+			regions = [{ "name": "Vse regije", "value": "all regions" }, { "name": "Gorenjska regija", "value": "Gorenjska" }, { "name": "Goriška regija", "value": "Goriška" }, { "name": "Jugovzhodna Slovenija", "value": "Southeast" }, { "name": "Koroška regija", "value": "Koroška" }, { "name": "Obalno-kraška regija", "value": "Obalno-Kraska" }, { "name": "Osrednjeslovenska regija", "value": "Osrednjeslovenska" }, { "name": "Podravska regija", "value": "Podravska" }, { "name": "Pomurska regija", "value": "Pomurje" }, { "name": "Posavska regija", "value": "Posavska region" }, { "name": "Primorsko-notranjska regija", "value": "Primorsko-Inner" }, { "name": "Savinjska regija", "value": "Savinjska" }, { "name": "Zasavska regija", "value": "Zasavska" }]
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("V kateri regiji iščete?","procedures",regions))
 
 		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 	else:
