@@ -2,7 +2,7 @@ apiai==1.2.3
 beautifulsoup4==4.6.0
 certifi==2018.1.18
 dialogflow-lite==0.0.6
-Django==2.0.4
+django==2.0.4
 django-cors-headers==2.2.0
 easy-thumbnails==2.5
 imgkit==1.0.1
