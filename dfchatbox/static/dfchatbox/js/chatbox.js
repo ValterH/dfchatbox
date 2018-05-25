@@ -366,9 +366,11 @@ function communicate(message,j){
                     i+=1;
                 }
                 disable_input(false);
-                console.log("wrapper" + last);
-                $("#inputField").focus();
-                document.getElementById("wrapper" + last).scrollIntoView({behavior: "smooth"});
+                if(typeof(last) !== 'undefined') {
+                    console.log("wrapper" + last);
+                    $("#inputField").focus();
+                    document.getElementById("wrapper" + last).scrollIntoView({behavior: "smooth"});
+                }
             }
 
             else if (response_type == "userInfo") {

@@ -697,7 +697,7 @@ def translate(input):
 # TODO: TRANSFER INTO DB
 def standardize_input(input):
 	input = input.lower()
-	return input.replace('arm', 'hand').replace('operation','surgery').replace("'"," ").replace("x-ray","rtg").replace("dentist","dental")
+	return input.replace('arm', 'hand').replace('operation','surgery').replace("'"," ").replace("x-ray","rtg")
 
 def standardize_db(procedures):
 	for procedure in procedures:
