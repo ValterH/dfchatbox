@@ -443,7 +443,7 @@ function communicate(message,j){
             $(".socketchatbox-chatArea").append(reply_others);
             saveElement(reply_others);
 
-            //$(".socketchatbox-typing").hide();
+            $(".socketchatbox-typing").hide();
             disable_input(false);
 
             $("#inputField").focus();
