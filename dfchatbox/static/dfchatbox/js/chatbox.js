@@ -8,6 +8,9 @@ $(document).ready(function(){
     $("#socketchatbox-sendFileBtn").css("background","#9a969a");
     $(".arrow-right").css("border-left","25px solid #bcbabb")
     //console.log("SESSION ID: " + localStorage.getItem("sessionID"));
+    greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="wrapper-others 000"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">' + 'Zdravo!' + '</span><br></div></div>';
+    $(".socketchatbox-chatArea").append(greeting);
+    saveElement(greeting);
 });
 
 $(".socketchatbox-page").keydown(function(t){
@@ -240,7 +243,7 @@ function communicate(message,j){
 
             $(".socketchatbox-chatArea").append(reply_others);
 
-            saveElement(reply_others);;
+            saveElement(reply_others);
 
             //<span id="option_holder' + j + '" class="socketchatbox-messageBody socketchatbox-messageBody-me"></span>
 
@@ -254,10 +257,8 @@ function communicate(message,j){
             //*************************************************************************** USER OPTION BUTTONS ***********************************************************************************************
 
             console.log(response['data']);
-            try {
-                data = JSON.parse(response['data'].replace(/'/g, '"'));
-            }
-            catch(err) {}
+            data = JSON.parse(response['data'].replace(/'/g, '"'));
+            console.log(data)
             response_type = response['response_type'];
             if (response_type == "list") {
                 //DATA IS LIST OF JSON OBJECTS
@@ -337,6 +338,7 @@ function communicate(message,j){
                     for (var l = 0; l < keys.length; l++) {
                         if (typeof(data[k][keys[l]]) == 'object'){
                             reply_others += slo_keys[l] + ": ";
+                            console.log(data[k][keys[l]])
                             reception = data[k][keys[l]];
                             //reception = JSON.parse(data[k][keys[l]]);
 
