@@ -3,14 +3,18 @@
 var j = 0;
 
 $(document).ready(function(){
+    var index = sessionStorage.getItem("index")
+    if (isNaN(index)) {
+        sessionStorage.setItem("index",0);
+    }
     //localStorage.removeItem("sessionID");
     //session_isValid();
     $("#socketchatbox-sendFileBtn").css("background","#9a969a");
     $(".arrow-right").css("border-left","25px solid #bcbabb")
     //console.log("SESSION ID: " + localStorage.getItem("sessionID"));
-    greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="wrapper-others 000"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">' + 'Zdravo!' + '</span><br></div></div>';
-    $(".socketchatbox-chatArea").append(greeting);
-    saveElement(greeting);
+    //greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="wrapper-others 000"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">Lepo pozdravljeni...</span></div></div>';
+    //$(".socketchatbox-chatArea").append(greeting);
+    //saveElement(greeting);
 });
 
 $(".socketchatbox-page").keydown(function(t){
@@ -74,13 +78,6 @@ function session_isValid() {
     }
 };
 
-//SET SESSION INDEX
-$(document).ready(function(){
-    if (sessionStorage.getItem("index") == null) {
-        sessionStorage.setItem("index",0);
-    }
-});
-
 //RETURNS CURRENT TIME
 function cur_date() {
     var n = new Date
@@ -121,7 +118,6 @@ function disable_input(start) {
 //SAVES CONVERSATION TO SESSION STORAGE
 function saveElement(element) {
         var index = sessionStorage.getItem("index");
-
         sessionStorage.setItem(index, element);
         sessionStorage.setItem("index", parseInt(index) + 1);
 };
@@ -130,21 +126,22 @@ function saveElement(element) {
 function reload_session_storage() {
     if (j == 0){
         var index = parseInt(sessionStorage.getItem("index"));
-
+        //console.log(sessionStorage.getItem("index"))
         if (index == 0) {
             return
         }
 
         for (var i = 0; i < index; i++) {
             var element = sessionStorage.getItem(i);
+            //console.log(element)
             $(".socketchatbox-chatArea").append(element)
         }
 
         parser = new DOMParser();
         element = parser.parseFromString(element, "text/xml");
-
+        //console.log(element)
         document.getElementById(element.firstChild.id).scrollIntoView({behavior: "instant"});
-
+        //console.log(document.getElementById(element.lastChild.id))
         j = Math.floor(index/2.0);
 
     }
