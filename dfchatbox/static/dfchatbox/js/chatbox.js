@@ -12,9 +12,16 @@ $(document).ready(function(){
     $("#socketchatbox-sendFileBtn").css("background","#9a969a");
     $(".arrow-right").css("border-left","25px solid #bcbabb")
     //console.log("SESSION ID: " + localStorage.getItem("sessionID"));
-    //greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="wrapper-others 000"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">Lepo pozdravljeni...</span></div></div>';
-    //$(".socketchatbox-chatArea").append(greeting);
-    //saveElement(greeting);
+    greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="greeting1"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others"><b>Lepo pozdravljeni!</span></div></div>';
+    $(".socketchatbox-chatArea").append(greeting);
+    saveElement(greeting);
+    greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="greeting2"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others"><b>Sem pametni agent CakalneVrste</span></div></div>';
+    $(".socketchatbox-chatArea").append(greeting);
+    saveElement(greeting);
+    greeting = '<div style="padding-bottom:1%;" class="socketchatbox-message-wrapper" id="greeting3"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime"></span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others"><b>Pomagal vam bom najti zdravstveni poseg, ki ga potrebujete.<br><i>Za več informacij napišite: "pomoč"</span></div></div>';
+    $(".socketchatbox-chatArea").append(greeting);
+    saveElement(greeting);
+    j=1;
 });
 
 $(".socketchatbox-page").keydown(function(t){
@@ -142,8 +149,12 @@ function reload_session_storage() {
         //console.log(element)
         document.getElementById(element.firstChild.id).scrollIntoView({behavior: "instant"});
         //console.log(document.getElementById(element.lastChild.id))
-        j = Math.floor(index/2.0);
+        if(index==1) j = 1;
+        else j = Math.floor(index/2.0);
 
+    }
+    if(j ==1) {
+        document.getElementById("greeting3").scrollIntoView({behavior: "instant"});
     }
 };
 
@@ -216,6 +227,7 @@ function communicate(message,j){
 
         try {
             //DIALOGFLOW RESPONSE CONTAINS DATA
+            console.log(response)
             response = response.replace(/\n/g, "\\n");
             response = response.replace(/\r/g, "\\r");
             response = JSON.parse(response);
