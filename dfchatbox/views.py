@@ -34,7 +34,9 @@ def index(request):
 		if(message=="pomoč"):
 			help ="<b>Da vam pomagam najti razpoložljivo storitev potrebujem naslednje informacije:<br><em>-kateri poseg iščete (npr. rentgen kolena)<br><em>-v kateri regiji iščete (npr. Gorenjska)<br><em>-kako nujno potrebujete poseg (npr. redno)<br><br><small>Vendar ne skrbite za regijo in nujnost vas bom povprašal sam.<br>Vi mi samo povejte katero storitev iščete."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(help,"none",[]))
-		message=translate(message)
+		
+		if not hasNumbers(message):
+			message=translate(message)
 
 		#print("user input: ", message)
 
@@ -46,9 +48,13 @@ def index(request):
 		# if translation != "":
 		# 	message = translation
 
-		## TODO:
-		## prepoznavanje regije?
-		# FIX QUERYING: pregled kolena
+		# TODO:
+		# prepoznavanje regije?
+		# FIX: -QUERYING: pregled kolena
+		#	   -if not hasNumbers(message):
+		#	    	message=translate(message)
+		#	   -...
+
 		print("message:",message)
 		if not hasNumbers(message) and message.find("NONE") < 0:
 			if checkRegion(message):
@@ -680,7 +686,7 @@ def edit(input):
 	return input.replace(",","").replace("("," ").replace(")"," ").replace("-"," ").replace("/"," ")
 
 def translate(input):
-	url = "http://translate.dis-apps.ijs.si/translate?sentence="+input
+	url = "http://translate.dis-apps.ijs.si/translate?sentence="+input.replace(","," ")
 	req = requests.get(url)
 	if req.text == '{"errors": {"sentence": "Invalid text value provided"}}' or req.text[1:-3] == '':
 		output=""
@@ -696,8 +702,6 @@ def translate(input):
 		return input
 	return req.text[1:-3]
 
-#FOR TESTING ONLY 
-# TODO: TRANSFER INTO DB
 def standardize_input(input):
 	input = input.lower()
 	return input.replace('arm', 'hand').replace('operation','surgery').replace("'"," ").replace("x-ray","rtg")
