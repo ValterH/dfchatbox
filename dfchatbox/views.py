@@ -18,8 +18,6 @@ import apiai
 import requests
 import base64
 from datetime import datetime
-
-# whoosh
 from dfchatbox.models import Procedure
 from haystack.query import SearchQuerySet
 
@@ -46,6 +44,8 @@ def index(request):
 		# if translation != "":
 		# 	message = translation
 
+		## TODO:
+		## prepoznavanje regije?
 		print("message:",message)
 		if not hasNumbers(message) and message.find("NONE") < 0:
 			if checkRegion(message):

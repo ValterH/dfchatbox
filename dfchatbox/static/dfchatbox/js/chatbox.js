@@ -254,7 +254,10 @@ function communicate(message,j){
             //*************************************************************************** USER OPTION BUTTONS ***********************************************************************************************
 
             console.log(response['data']);
-            data = JSON.parse(response['data'].replace(/'/g, '"'));
+            try {
+                data = JSON.parse(response['data'].replace(/'/g, '"'));
+            }
+            catch(err) {}
             response_type = response['response_type'];
             if (response_type == "list") {
                 //DATA IS LIST OF JSON OBJECTS
@@ -367,7 +370,7 @@ function communicate(message,j){
                 }
                 disable_input(false);
                 if(typeof(last) !== 'undefined') {
-                    console.log("wrapper" + last);
+                    //console.log("wrapper" + last);
                     $("#inputField").focus();
                     document.getElementById("wrapper" + last).scrollIntoView({behavior: "smooth"});
                 }
