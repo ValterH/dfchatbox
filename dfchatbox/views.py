@@ -151,7 +151,17 @@ def index(request):
 			print("A")
 			regions = [{ "name": "Vse regije", "value": "all regions" }, { "name": "Gorenjska regija", "value": "Gorenjska" }, { "name": "Goriška regija", "value": "Goriska" }, { "name": "Jugovzhodna Slovenija", "value": "Southeast" }, { "name": "Koroška regija", "value": "Koroška" }, { "name": "Obalno-kraška regija", "value": "Obalno-Kraska" }, { "name": "Osrednjeslovenska regija", "value": "Ljubljana" }, { "name": "Podravska regija", "value": "Podravska" }, { "name": "Pomurska regija", "value": "Pomurje" }, { "name": "Posavska regija", "value": "Posavska region" }, { "name": "Primorsko-notranjska regija", "value": "Primorsko-Inner" }, { "name": "Savinjska regija", "value": "Savinjska" }, { "name": "Zasavska regija", "value": "Zasavska" }]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",regions))
-		if text_answer.find("Našel sem naslednje posege...")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo.":
+
+		if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and not 'regions' in OGrequest.session:
+			OGrequest.session['regions']=1
+			text_answer = "Poseg v vaši regiji trenutno ni na voljo. Ali želite, da iščem v vseh regijah?"
+			value="A " + answer_json['result']['parameters']['urgency'] + " " + answer_json['result']['parameters']['procedure']
+			data = [{"name":"DA", "value":value},{"name":"NE","value":"reset"}]
+			response_type="procedures"
+
+		if text_answer.find("Našel sem naslednje posege...")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosimo začnite ponovno z iskanjem":
+			if 'regions' in OGrequest.session:
+				del OGrequest.session['regions']
 			if 'procedure' in OGrequest.session:
 				del OGrequest.session['procedure']
 			if 'group' in OGrequest.session:
