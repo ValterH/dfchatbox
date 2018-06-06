@@ -75,7 +75,7 @@ def index(request):
 		contexts = []
 
 		ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
-
+		OGrequest = request
 		request = ai.text_request()
 		request.session_id = sessionID
 		request.lang = 'en'
@@ -89,7 +89,40 @@ def index(request):
 		print(answer_json)
 
 		text_answer = answer_json['result']['fulfillment']['messages'][0]['speech']
-
+		
+		groups = []
+		procedure =""
+		if not 'procedure' in OGrequest.session:
+			if not 'group' in OGrequest.session:
+				try: 
+					groups = answer_json['result']['parameters']['group']
+				except:
+					print('No group')
+			try: 
+				procedure = answer_json['result']['parameters']['procedure']
+			except:
+				print('No procedure')
+		if procedure:
+			OGrequest.session['procedure']=1
+			procedures =Procedure.objects.all()				
+			for pro in procedures:
+				if pro.procedure_id == procedure:
+					p = pro
+					break
+			text_answer = "Našel sem poseg <b>" + pro.nameSLO + "</b><br>" + text_answer
+		else:
+			if groups:
+				OGrequest.session['group']=1
+				if len(groups)>1:
+					answer = text_answer
+					text_answer = "Našel sem naslednje skupine posegov: "
+					for group in groups:
+						text_answer += "<br>-" + group
+					text_answer += "<br>" + answer
+				else:
+					text_answer = "Našel sem skupino posegov <b>" + groups[0] + "</b><br>" + text_answer
+			
+			
 		#text_answer = text_answer.replace('\\','\\\\')
 
 		print(text_answer)
@@ -108,15 +141,15 @@ def index(request):
 
 		    
 
-		if text_answer == "Kako hitro potrebujete poseg?":
+		if text_answer.find("Kako hitro potrebujete poseg?")>-1:
 			print("A")
 			urgencies = [{"name":"Zelo hitro","value":"Very fast"},{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"}]
-			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Kako hitro potrebujete poseg?","procedures",urgencies))
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",urgencies))
 
-		if text_answer == "V kateri regiji iščete?":
+		if text_answer.find("V kateri regiji iščete?")>-1:
 			print("A")
 			regions = [{ "name": "Vse regije", "value": "all regions" }, { "name": "Gorenjska regija", "value": "Gorenjska" }, { "name": "Goriška regija", "value": "Goriska" }, { "name": "Jugovzhodna Slovenija", "value": "Southeast" }, { "name": "Koroška regija", "value": "Koroška" }, { "name": "Obalno-kraška regija", "value": "Obalno-Kraska" }, { "name": "Osrednjeslovenska regija", "value": "Ljubljana" }, { "name": "Podravska regija", "value": "Podravska" }, { "name": "Pomurska regija", "value": "Pomurje" }, { "name": "Posavska regija", "value": "Posavska region" }, { "name": "Primorsko-notranjska regija", "value": "Primorsko-Inner" }, { "name": "Savinjska regija", "value": "Savinjska" }, { "name": "Zasavska regija", "value": "Zasavska" }]
-			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("V kateri regiji iščete?","procedures",regions))
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",regions))
 
 		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 	else:
@@ -725,7 +758,6 @@ def whoosh(input):
 		all_results = query(all_results, keywords)
 		# for keyword in keywords:
 		# 	all_results = all_results.filter(content=keyword)
-
 		for result in all_results:
 			dict ={}
 			dict['name']=result.object.nameSLO
@@ -770,6 +802,10 @@ def query(set,keywords):
 	for p in pairs:
 		new_set = set.filter(content=p[0]).filter(content=p[1])
 		result |= new_set
+	if len(result) == 0 and len(keywords)>1:
+		for keyword in keywords:
+			new_set = set.filter(content=keyword)
+			result |= new_set
 	return result
 
 def pair(list):
