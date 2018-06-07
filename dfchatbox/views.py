@@ -11,6 +11,7 @@ import string
 import random
 from PIL import Image
 from lxml.html import fromstring
+from lxml import etree
 import json
 from bs4 import BeautifulSoup
 import urllib3
@@ -34,8 +35,8 @@ def index(request):
 		if(message=="pomoč"):
 			help ="<b>Da vam pomagam najti razpoložljivo storitev potrebujem naslednje informacije:<br><em>-kateri poseg iščete (npr. rentgen kolena)<br><em>-v kateri regiji iščete (npr. Gorenjska)<br><em>-kako nujno potrebujete poseg (npr. redno)<br><br><small>Vendar ne skrbite za regijo in nujnost vas bom povprašal sam.<br>Vi mi samo povejte katero storitev iščete."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(help,"none",[]))
-		
-		if not hasNumbers(message):
+		messageSLO = lemmatize(message)
+		if not hasNumbers(message) or message.find("24")>-1:
 			message=translate(message)
 
 		#print("user input: ", message)
@@ -50,16 +51,15 @@ def index(request):
 
 		# TODO:
 		# prepoznavanje regije?
-		# FIX: -QUERYING: pregled kolena
-		#	   -if not hasNumbers(message):
-		#	    	message=translate(message)
-		#	   -...
 
 		print("message:",message)
-		if not hasNumbers(message) and message.find("NONE") < 0 and message != "reset":
+		if (not hasNumbers(message) or message.find("24") > -1) and message.find("NONE") < 0 and message != "reset":
 			if checkRegion(message):
-				whoosh_data = whoosh(message)
-				print(whoosh_data)
+				whoosh_data = findSLO(messageSLO)
+				#print("SLO", whoosh_data)
+				if(len(whoosh_data) < 2):
+					whoosh_data = whoosh(message)
+				#print(whoosh_data)
 				if len(whoosh_data) > 1:
 					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
 				else:
@@ -140,11 +140,16 @@ def index(request):
 		    if url[:5] != "https":
 		    	url = "https:" + url[5:]
 
-		    
+		if response_type == "procedures":
+			none={}
+			none['name']="Nobeden izmed zgoraj naštetih"
+			none['value']= "NONE"
+			answer_json['result']['fulfillment']['data']['data'] = answer_json['result']['fulfillment']['data']['data'].append(none)
+
 
 		if text_answer.find("Kako hitro potrebujete poseg?")>-1:
 			print("A")
-			urgencies = [{"name":"Zelo hitro","value":"Very fast"},{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"}]
+			urgencies = [{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"},{"name":"Zelo hitro","value":"very fast"}]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",urgencies))
 
 		if text_answer.find("V kateri regiji iščete?")>-1:
@@ -152,7 +157,7 @@ def index(request):
 			regions = [{ "name": "Vse regije", "value": "all regions" }, { "name": "Gorenjska regija", "value": "Gorenjska" }, { "name": "Goriška regija", "value": "Goriska" }, { "name": "Jugovzhodna Slovenija", "value": "Southeast" }, { "name": "Koroška regija", "value": "Koroška" }, { "name": "Obalno-kraška regija", "value": "Obalno-Kraska" }, { "name": "Osrednjeslovenska regija", "value": "Ljubljana" }, { "name": "Podravska regija", "value": "Podravska" }, { "name": "Pomurska regija", "value": "Pomurje" }, { "name": "Posavska regija", "value": "Posavska region" }, { "name": "Primorsko-notranjska regija", "value": "Primorsko-Inner" }, { "name": "Savinjska regija", "value": "Savinjska" }, { "name": "Zasavska regija", "value": "Zasavska" }]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",regions))
 
-		if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and not 'regions' in OGrequest.session:
+		if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and not 'regions' in OGrequest.session and answer_json['result']['parameters']['region'] != "A":
 			OGrequest.session['regions']=1
 			text_answer = "Poseg v vaši regiji trenutno ni na voljo. Ali želite, da iščem v vseh regijah?"
 			value="A " + answer_json['result']['parameters']['urgency'] + " " + answer_json['result']['parameters']['procedure']
@@ -167,6 +172,8 @@ def index(request):
 			if 'group' in OGrequest.session:
 				del OGrequest.session['group']
 			OGrequest.session.modified = True
+			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
+				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
 		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 	else:
 		return render(request,'dfchatbox/index.html')
@@ -831,4 +838,47 @@ def pair(list):
 			if list.index(item) > list.index(item2):
 				result.append([item,item2])
 	return result
+
+def lemmatize(input):
+	lemmatized =""
+	url = "http://oznacevalnik.slovenscina.eu/Vsebine/Sl/SpletniServis/SpletniServis.aspx"
+	d = {"ctl00$ctl00$ContentPlaceHolder$ContentFullPlaceHolder$TextBox":input,
+		 "ctl00$ctl00$ContentPlaceHolder$ContentFullPlaceHolder$OutputType":"TEI-XML",
+		 "ctl00$ctl00$ContentPlaceHolder$ContentFullPlaceHolder$Submit":"Označi besedilo",
+		 "__VIEWSTATE":"/wEPDwULLTE4Njg1MDAxNDAPZBYCZg9kFgJmD2QWAgILD2QWAgIBD2QWAgIBD2QWAgIJD2QWAmYPZBYCAgEPDxYCHgRUZXh0Bf8MPGRpdiBjbGFzcz0ncCc+PHRhYmxlIGJvcmRlcj0nMScgY2xhc3M9J2NvbnRhaW5lcic+DQo8dHI+PHRoIGFsaWduPSdsZWZ0JyB2YWxpZ249J21pZGRsZSc+MTwvdGg+PHRoIGFsaWduPSdsZWZ0JyB2YWxpZ249J21pZGRsZSc+PHRhYmxlIGJvcmRlcj0nMCc+PHRyPjx0aCBhbGlnbj0nbGVmdCc+YmVzZWRhPC90aD48L3RyPjx0cj48dGggYWxpZ249J2xlZnQnPmxlbWE8L3RoPjwvdHI+PHRyPjx0aCBhbGlnbj0nbGVmdCc+b3puYWthPC90aD48L3RyPjwvdGFibGU+PC90aD48dGQgbm93cmFwPSdub3dyYXAnIGFsaWduPSdsZWZ0JyB2YWxpZ249J2Jhc2VsaW5lJz48dGFibGUgYm9yZGVyPScwJz4NCjx0cj48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd3b3JkJz4yNDwvdGQ+PHRkIG5vd3JhcD0nbm93cmFwJz48c3BhbiBjbGFzcz0nd29yZCc+dXJuYTwvdGQ+PHRkIG5vd3JhcD0nbm93cmFwJz48c3BhbiBjbGFzcz0nd29yZCc+cGg8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J3dvcmQnPm1ldHJpamE8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J3dvcmQnPnBvxb5pcmFsbmlrYTwvdGQ+PC90cj4NCjx0cj48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSdsZW1tYSc+MjQ8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J2xlbW1hJz51cmVuPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSdsZW1tYSc+cGg8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J2xlbW1hJz5tZXRyaWo8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J2xlbW1hJz5wb8W+aXJhbG5pazwvdGQ+PC90cj4NCjx0cj48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdLID0gxaF0ZXZuaWsKYSA9IHphcGlzID0gYXJhYnNraQpnID0gdnJzdGEgPSBnbGF2bmknPkthZzwvdGQ+PHRkIG5vd3JhcD0nbm93cmFwJz48c3BhbiBjbGFzcz0ndGFnJyB0aXRsZT0nUCA9IHByaWRldm5pawpwID0gdnJzdGEgPSBzcGxvxaFuaSAKbiA9IHN0b3BuamEgPSBuZWRvbG/EjWVuYQp6ID0gc3BvbCA9IMW+ZW5za2kgCmUgPSDFoXRldmlsbyA9IGVkbmluYQppID0gc2tsb24gPSBpbWVub3ZhbG5payc+UHBuemVpPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdTID0gc2Ftb3N0YWxuaWsKbyA9IHZyc3RhID0gb2LEjW5vIGltZQptID0gc3BvbCA9IG1vxaFraQplID0gxaF0ZXZpbG8gPSBlZG5pbmEKaSA9IHNrbG9uID0gaW1lbm92YWxuaWsnPlNvbWVpPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdTID0gc2Ftb3N0YWxuaWsKbyA9IHZyc3RhID0gb2LEjW5vIGltZQptID0gc3BvbCA9IG1vxaFraQplID0gxaF0ZXZpbG8gPSBlZG5pbmEKciA9IHNrbG9uID0gcm9kaWxuaWsnPlNvbWVyPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdTID0gc2Ftb3N0YWxuaWsKbyA9IHZyc3RhID0gb2LEjW5vIGltZQptID0gc3BvbCA9IG1vxaFraQplID0gxaF0ZXZpbG8gPSBlZG5pbmEKciA9IHNrbG9uID0gcm9kaWxuaWsnPlNvbWVyPC90ZD48L3RyPg0KPC90YWJsZT48L3RyPg0KPC90YWJsZT48L2Rpdj4NCmRkGAEFPmN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlciRDb250ZW50RnVsbFBsYWNlSG9sZGVyJFBhZ2VWaWV3Dw9kZmRYTtzAiXLlfvRfBNKg9KO/aHMx6w==",
+		 "__VIEWSTATEGENERATOR":"535F794B",
+		 "__EVENTVALIDATION":"/wEWBwKr4a2PDwKC58p0ApztuuoJAp3301oC2vnrkwcCw7Sziw4CoPf71AXHfE/irD0Kkc2+NZodo6vp6xYZ8w=="
+		 }
+	response = requests.post(url, data = d)
+	html = response.text
+	soup = BeautifulSoup(html,"html.parser")
+	xml=soup.find_all('pre')[0].text
+	root = etree.fromstring(xml)
+	els = root[0][0][0][0]
+	i = 0
+	for el in els:
+		if i%2==0:
+			lemmatized += el.attrib['lemma'] + " "
+		i+=1
+	return lemmatized
+
+def findSLO(input):
+	words = input.split(" ")
+	results = Procedure.objects.none()
+	for word in words:
+		if word:
+			results |= Procedure.objects.filter(nameSLO__contains=word+" ")
+
+	data = []
+	for result in results:
+		dict ={}
+		dict['name']= result.nameSLO
+		dict['value']= result.procedure_id
+		data.append(dict)
+	none={}
+	none['name']="Nobeden izmed zgoraj naštetih"
+	none['value']=input + " NONE"
+	data.append(none)
+	return data
+
 

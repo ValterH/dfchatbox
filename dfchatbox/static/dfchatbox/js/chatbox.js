@@ -353,13 +353,13 @@ function communicate(message,j){
 
                             reception_keys = ["availability", "days_to"];
                             if (isNaN(reception[reception_keys[1]])){
-                                reply_others += reception[reception_keys[0]] + "<br>";
+                                reply_others += "<b>" + reception[reception_keys[0]] + "<br></b>";
                             }
                             else if (reception[reception_keys[1]] == 1){
-                                reply_others += reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dan)" + "<br>";
+                                reply_others += "<b>" + reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dan)" + "<br></b>";
                             }
                             else {
-                                reply_others += reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dni)" + "<br>";
+                                reply_others += "<b>" +reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dni)" + "<br></b>";
                             }
 
                             // for (var m = 0; m < reception_keys.length; m++) {
