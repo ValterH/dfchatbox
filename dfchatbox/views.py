@@ -867,7 +867,8 @@ def findSLO(input):
 	results = Procedure.objects.none()
 	for word in words:
 		if word:
-			results |= Procedure.objects.filter(nameSLO__contains=word+" ")
+			if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za"]:
+				results |= Procedure.objects.filter(nameSLO__contains=word+" ")
 
 	data = []
 	for result in results:
@@ -877,7 +878,7 @@ def findSLO(input):
 		data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']=input + " NONE"
+	none['value']=translate(input) + " NONE"
 	data.append(none)
 	return data
 
