@@ -148,7 +148,6 @@ def index(request):
 
 
 		if text_answer.find("Kako hitro potrebujete poseg?")>-1:
-			print("A")
 			urgencies = [{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"},{"name":"Zelo hitro","value":"very fast"}]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",urgencies))
 
@@ -886,7 +885,9 @@ def findSLO(input):
 	for word in words:
 		if word and len(results.filter(lemma__icontains=word+" "))>0:
 			keywords.append(word)
-	print("keywords:",keywords)
+	print("keywordsSLO:",keywords)
+	if not keywords:
+		return []
 	for word in keywords:
 		if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za","biti"]:
 			results = results.filter(lemma__icontains=word+" ")
