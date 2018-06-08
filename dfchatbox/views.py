@@ -35,7 +35,7 @@ def index(request):
 		if(message=="pomoč"):
 			help ="<b>Da vam pomagam najti razpoložljivo storitev potrebujem naslednje informacije:<br><em>-kateri poseg iščete (npr. rentgen kolena)<br><em>-v kateri regiji iščete (npr. Gorenjska)<br><em>-kako nujno potrebujete poseg (npr. redno)<br><br><small>Vendar ne skrbite za regijo in nujnost vas bom povprašal sam.<br>Vi mi samo povejte katero storitev iščete."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(help,"none",[]))
-		messageSLO = lemmatize(message)
+		messageSLO = message
 		if not hasNumbers(message) or message.find("24")>-1:
 			message=translate(message)
 
@@ -55,7 +55,7 @@ def index(request):
 		print("message:",message)
 		if (not hasNumbers(message) or message.find("24") > -1) and message.find("NONE") < 0 and message != "reset":
 			if checkRegion(message):
-				whoosh_data = findSLO(messageSLO)
+				whoosh_data = findSLO(lemmatize(messageSLO))
 				#print("SLO", whoosh_data)
 				if(len(whoosh_data) < 2):
 					whoosh_data = whoosh(message)
@@ -730,12 +730,14 @@ def update_db(request):
 		nameSLO=edit(procedure['Name'])
 		nameENG=translate(nameSLO).lower()
 		pid=procedure['Id']
-		#print(nameSLO)
+		print("SLO:",nameSLO)
+		lem =lemmatize(nameSLO)
+		print("LEM:",lem)
 		#print(nameENG)
 		#print()
-		new_procedure=Procedure(nameENG=nameENG, nameSLO=nameSLO, procedure_id=pid)
+		new_procedure=Procedure(nameENG=nameENG, nameSLO=nameSLO, procedure_id=pid, lemma=lem)
 		new_procedure.save()
-		print(len(Procedure.objects.all()))
+	print(len(Procedure.objects.all()))
 	return HttpResponse('Database Updated')
 
 def edit(input):
@@ -749,9 +751,9 @@ def translate(input):
 		words=input.split(" ")
 		if(len(words)>1):
 			for word in words:
-				print(word)
+				#print(word)
 				word=word.replace('rad','like to')
-				print(word)
+				#print(word)
 				if word:
 					output+=translate(word)+" "
 			return output
@@ -840,15 +842,26 @@ def pair(list):
 	return result
 
 def lemmatize(input):
-	lemmatized =""
+
 	url = "http://oznacevalnik.slovenscina.eu/Vsebine/Sl/SpletniServis/SpletniServis.aspx"
+
+	#GET FORM DATA
+	response = requests.get(url)
+	html = response.text
+	soup = BeautifulSoup(html,"html.parser")
+	viewstate=soup.find("input", {"id":"__VIEWSTATE"}).attrs['value']
+	viewstategenerator=soup.find("input", {"id":"__VIEWSTATEGENERATOR"}).attrs['value']
+	eventvalidation=soup.find("input", {"id":"__EVENTVALIDATION"}).attrs['value']
+
 	d = {"ctl00$ctl00$ContentPlaceHolder$ContentFullPlaceHolder$TextBox":input,
 		 "ctl00$ctl00$ContentPlaceHolder$ContentFullPlaceHolder$OutputType":"TEI-XML",
 		 "ctl00$ctl00$ContentPlaceHolder$ContentFullPlaceHolder$Submit":"Označi besedilo",
-		 "__VIEWSTATE":"/wEPDwULLTE4Njg1MDAxNDAPZBYCZg9kFgJmD2QWAgILD2QWAgIBD2QWAgIBD2QWAgIJD2QWAmYPZBYCAgEPDxYCHgRUZXh0Bf8MPGRpdiBjbGFzcz0ncCc+PHRhYmxlIGJvcmRlcj0nMScgY2xhc3M9J2NvbnRhaW5lcic+DQo8dHI+PHRoIGFsaWduPSdsZWZ0JyB2YWxpZ249J21pZGRsZSc+MTwvdGg+PHRoIGFsaWduPSdsZWZ0JyB2YWxpZ249J21pZGRsZSc+PHRhYmxlIGJvcmRlcj0nMCc+PHRyPjx0aCBhbGlnbj0nbGVmdCc+YmVzZWRhPC90aD48L3RyPjx0cj48dGggYWxpZ249J2xlZnQnPmxlbWE8L3RoPjwvdHI+PHRyPjx0aCBhbGlnbj0nbGVmdCc+b3puYWthPC90aD48L3RyPjwvdGFibGU+PC90aD48dGQgbm93cmFwPSdub3dyYXAnIGFsaWduPSdsZWZ0JyB2YWxpZ249J2Jhc2VsaW5lJz48dGFibGUgYm9yZGVyPScwJz4NCjx0cj48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd3b3JkJz4yNDwvdGQ+PHRkIG5vd3JhcD0nbm93cmFwJz48c3BhbiBjbGFzcz0nd29yZCc+dXJuYTwvdGQ+PHRkIG5vd3JhcD0nbm93cmFwJz48c3BhbiBjbGFzcz0nd29yZCc+cGg8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J3dvcmQnPm1ldHJpamE8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J3dvcmQnPnBvxb5pcmFsbmlrYTwvdGQ+PC90cj4NCjx0cj48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSdsZW1tYSc+MjQ8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J2xlbW1hJz51cmVuPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSdsZW1tYSc+cGg8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J2xlbW1hJz5tZXRyaWo8L3RkPjx0ZCBub3dyYXA9J25vd3JhcCc+PHNwYW4gY2xhc3M9J2xlbW1hJz5wb8W+aXJhbG5pazwvdGQ+PC90cj4NCjx0cj48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdLID0gxaF0ZXZuaWsKYSA9IHphcGlzID0gYXJhYnNraQpnID0gdnJzdGEgPSBnbGF2bmknPkthZzwvdGQ+PHRkIG5vd3JhcD0nbm93cmFwJz48c3BhbiBjbGFzcz0ndGFnJyB0aXRsZT0nUCA9IHByaWRldm5pawpwID0gdnJzdGEgPSBzcGxvxaFuaSAKbiA9IHN0b3BuamEgPSBuZWRvbG/EjWVuYQp6ID0gc3BvbCA9IMW+ZW5za2kgCmUgPSDFoXRldmlsbyA9IGVkbmluYQppID0gc2tsb24gPSBpbWVub3ZhbG5payc+UHBuemVpPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdTID0gc2Ftb3N0YWxuaWsKbyA9IHZyc3RhID0gb2LEjW5vIGltZQptID0gc3BvbCA9IG1vxaFraQplID0gxaF0ZXZpbG8gPSBlZG5pbmEKaSA9IHNrbG9uID0gaW1lbm92YWxuaWsnPlNvbWVpPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdTID0gc2Ftb3N0YWxuaWsKbyA9IHZyc3RhID0gb2LEjW5vIGltZQptID0gc3BvbCA9IG1vxaFraQplID0gxaF0ZXZpbG8gPSBlZG5pbmEKciA9IHNrbG9uID0gcm9kaWxuaWsnPlNvbWVyPC90ZD48dGQgbm93cmFwPSdub3dyYXAnPjxzcGFuIGNsYXNzPSd0YWcnIHRpdGxlPSdTID0gc2Ftb3N0YWxuaWsKbyA9IHZyc3RhID0gb2LEjW5vIGltZQptID0gc3BvbCA9IG1vxaFraQplID0gxaF0ZXZpbG8gPSBlZG5pbmEKciA9IHNrbG9uID0gcm9kaWxuaWsnPlNvbWVyPC90ZD48L3RyPg0KPC90YWJsZT48L3RyPg0KPC90YWJsZT48L2Rpdj4NCmRkGAEFPmN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlciRDb250ZW50RnVsbFBsYWNlSG9sZGVyJFBhZ2VWaWV3Dw9kZmRYTtzAiXLlfvRfBNKg9KO/aHMx6w==",
-		 "__VIEWSTATEGENERATOR":"535F794B",
-		 "__EVENTVALIDATION":"/wEWBwKr4a2PDwKC58p0ApztuuoJAp3301oC2vnrkwcCw7Sziw4CoPf71AXHfE/irD0Kkc2+NZodo6vp6xYZ8w=="
+		 "__VIEWSTATE":viewstate,
+		 "__VIEWSTATEGENERATOR":viewstategenerator,
+		 "__EVENTVALIDATION":eventvalidation
 		 }
+	lemmatized =""
+
 	response = requests.post(url, data = d)
 	html = response.text
 	soup = BeautifulSoup(html,"html.parser")
@@ -858,17 +871,30 @@ def lemmatize(input):
 	i = 0
 	for el in els:
 		if i%2==0:
-			lemmatized += el.attrib['lemma'] + " "
+			try: 
+				lemmatized += el.attrib['lemma'] + " "
+			except: 
+				print("element has no lemma")
 		i+=1
 	return lemmatized
 
 def findSLO(input):
 	words = input.split(" ")
-	results = Procedure.objects.none()
+
+	keywords = []
+	results = Procedure.objects.all()
 	for word in words:
-		if word:
-			if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za"]:
-				results |= Procedure.objects.filter(nameSLO__contains=word+" ")
+		if word and len(results.filter(lemma__icontains=word+" "))>0:
+			keywords.append(word)
+	print("keywords:",keywords)
+	for word in keywords:
+		if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za","biti"]:
+			results = results.filter(lemma__icontains=word+" ")
+	print(len(results))
+	if len(results) < 1:
+		for word in keywords:
+			if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za","biti"]:
+				results |= Procedure.objects.filter(lemma__icontains=word+" ")
 
 	data = []
 	for result in results:
@@ -878,7 +904,7 @@ def findSLO(input):
 		data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']=translate(input) + " NONE"
+	none['value']=translate(input).replace("'m"," am") + " NONE"
 	data.append(none)
 	return data
 
