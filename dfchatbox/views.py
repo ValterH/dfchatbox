@@ -93,7 +93,7 @@ def index(request):
 		
 		groups = []
 		procedure =""
-		if not 'procedure' in OGrequest.session:
+		if not 'procedure' in OGrequest.session and message != 'reset':
 			if not 'group' in OGrequest.session:
 				try: 
 					groups = answer_json['result']['parameters']['group']
@@ -110,7 +110,7 @@ def index(request):
 				if pro.procedure_id == procedure:
 					p = pro
 					break
-			text_answer = "Našel sem poseg <b>" + pro.nameSLO + "</b><br>" + text_answer
+			text_answer = "Našel sem <b>" + pro.nameSLO + "</b><br>" + text_answer
 		else:
 			if groups:
 				OGrequest.session['group']=1
@@ -118,10 +118,11 @@ def index(request):
 					answer = text_answer
 					text_answer = "Našel sem naslednje skupine posegov: "
 					for group in groups:
+						group = requests.get('http://translate.dis-apps.ijs.si/translate', params={'sentence':group,'fromLang':'en','toLang':'sl'}).text[1:-3]
 						text_answer += "<br>-" + group
 					text_answer += "<br>" + answer
 				else:
-					text_answer = "Našel sem skupino posegov <b>" + groups[0] + "</b><br>" + text_answer
+					text_answer = "Našel sem skupino posegov <b>" + requests.get('http://translate.dis-apps.ijs.si/translate', params={'sentence':groups[0],'fromLang':'en','toLang':'sl'}).text[1:-3] + "</b><br>" + text_answer
 			
 			
 		#text_answer = text_answer.replace('\\','\\\\')
@@ -163,7 +164,7 @@ def index(request):
 			data = [{"name":"DA", "value":value},{"name":"NE","value":"reset"}]
 			response_type="procedures"
 
-		if text_answer.find("Našel sem naslednje posege...")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosimo začnite ponovno z iskanjem":
+		if text_answer.find("Našel sem naslednje posege...")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosim ponovno začnite z iskanjem":
 			if 'regions' in OGrequest.session:
 				del OGrequest.session['regions']
 			if 'procedure' in OGrequest.session:
