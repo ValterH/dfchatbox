@@ -41,7 +41,7 @@ def index(request):
 
 		#print("user input: ", message)
 
-		# url = "http://translate.dis-apps.ijs.si/translate?sentence=" + message
+		# url = "http://translation-api.docker-e9.ijs.si/translate?sentence=" + message
 
 		# response = requests.get(url)
 		# translation = response.text[1:-3]
@@ -118,11 +118,11 @@ def index(request):
 					answer = text_answer
 					text_answer = "Našel sem naslednje skupine posegov: "
 					for group in groups:
-						group = requests.get('http://translate.dis-apps.ijs.si/translate', params={'sentence':group,'fromLang':'en','toLang':'sl'}).text[1:-3]
+						group = requests.get('http://translation-api.docker-e9.ijs.si/translate', params={'sentence':group,'fromLang':'en','toLang':'sl'}).text[1:-3]
 						text_answer += "<br>-" + group
 					text_answer += "<br>" + answer
 				else:
-					text_answer = "Našel sem skupino posegov <b>" + requests.get('http://translate.dis-apps.ijs.si/translate', params={'sentence':groups[0],'fromLang':'en','toLang':'sl'}).text[1:-3] + "</b><br>" + text_answer
+					text_answer = "Našel sem skupino posegov <b>" + requests.get('http://translation-api.docker-e9.ijs.si/translate', params={'sentence':groups[0],'fromLang':'en','toLang':'sl'}).text[1:-3] + "</b><br>" + text_answer
 			
 			
 		#text_answer = text_answer.replace('\\','\\\\')
@@ -744,7 +744,7 @@ def edit(input):
 	return input.replace(",","").replace("("," ").replace(")"," ").replace("-"," ").replace("/"," ")
 
 def translate(input):
-	url = "http://translate.dis-apps.ijs.si/translate?sentence="+input.replace(","," ")
+	url = "http://translation-api.docker-e9.ijs.si/translate?sentence="+input.replace(","," ")
 	req = requests.get(url)
 	if req.text == '{"errors": {"sentence": "Invalid text value provided"}}' or req.text[1:-3] == '':
 		output=""
