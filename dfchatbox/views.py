@@ -784,10 +784,11 @@ def whoosh(input):
 		# for keyword in keywords:
 		# 	all_results = all_results.filter(content=keyword)
 		for result in all_results:
-			dict ={}
-			dict['name']=result.object.nameSLO
-			dict['value']=input + " " + result.object.procedure_id
-			data.append(dict)
+			if result.object:
+				dict ={}
+				dict['name']=result.object.nameSLO
+				dict['value']=input + " " + result.object.procedure_id
+				data.append(dict)
 			#print(result.score)
 		none={}
 		none['name']="Nobeden izmed zgoraj naštetih"
