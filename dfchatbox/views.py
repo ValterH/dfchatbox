@@ -105,12 +105,10 @@ def index(request):
 				print('No procedure')
 		if procedure:
 			OGrequest.session['procedure']=1
-			procedures =Procedure.objects.all()				
-			for pro in procedures:
-				if pro.procedure_id == procedure:
-					p = pro
-					break
-			text_answer = "Našel sem <b>" + pro.nameSLO + "</b><br>" + text_answer
+			pro = Procedure.objects.all().filter(procedure_id=procedure)
+			if len(pro) > 0:
+				text_answer = "Našel sem <b>" + pro[0].nameSLO + "</b><br>" + text_answer
+			else: text_answer = "Žal je prišlo do napake v naši bazi posegov, morda poseg ni več na voljo."
 		else:
 			if groups:
 				OGrequest.session['group']=1
