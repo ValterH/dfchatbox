@@ -36,7 +36,7 @@ def index(request):
 			help ="<b>Da vam pomagam najti razpoložljivo storitev potrebujem naslednje informacije:<br><em>-kateri poseg iščete (npr. rentgen kolena)<br><em>-v kateri regiji iščete (npr. Gorenjska)<br><em>-kako nujno potrebujete poseg (npr. redno)<br><br><small>Vendar ne skrbite za regijo in nujnost vas bom povprašal sam.<br>Vi mi samo povejte katero storitev iščete."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(help,"none",[]))
 		messageSLO = message
-		if not hasNumbers(message) or message.find("24")>-1:
+		if not hasNumbers(message) or message.find("24")>-1 or message=="reset":
 			message=translate(message)
 
 		#print("user input: ", message)
@@ -107,7 +107,7 @@ def index(request):
 			OGrequest.session['procedure']=1
 			pro = Procedure.objects.all().filter(procedure_id=procedure)
 			if len(pro) > 0:
-				text_answer = "Našel sem <b>" + pro[0].nameSLO + "</b><br>" + text_answer
+				text_answer = text_answer.replace("poseg","<b>" + pro[0].nameSLO + "</b>")
 			else: text_answer = "Žal je prišlo do napake v naši bazi posegov, morda poseg ni več na voljo."
 		else:
 			if groups:
@@ -120,7 +120,7 @@ def index(request):
 						text_answer += "<br>-" + group
 					text_answer += "<br>" + answer
 				else:
-					text_answer = "Našel sem skupino posegov <b>" + requests.get('http://translation-api.docker-e9.ijs.si/translate', params={'sentence':groups[0],'fromLang':'en','toLang':'sl'}).text[1:-3] + "</b><br>" + text_answer
+					text_answer = "Našel sem skupino posegov <b>" + requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + groups[0] +'&fromLang=en&toLang=sl').text[1:-3] + "</b>.<br>" + text_answer
 			
 			
 		#text_answer = text_answer.replace('\\','\\\\')
@@ -146,7 +146,7 @@ def index(request):
 			answer_json['result']['fulfillment']['data']['data'] = answer_json['result']['fulfillment']['data']['data'].append(none)
 
 
-		if text_answer.find("Kako hitro potrebujete poseg?")>-1:
+		if text_answer.find("Kako hitro potrebujete")>-1:
 			urgencies = [{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"},{"name":"Zelo hitro","value":"very fast"}]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",urgencies))
 
@@ -173,6 +173,7 @@ def index(request):
 			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
 				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
 		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
+		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
 	else:
 		return render(request,'dfchatbox/index.html')
 
@@ -203,6 +204,8 @@ def edit(input):
 def translate(input):
 	url = "http://translation-api.docker-e9.ijs.si/translate?sentence="+input.replace(","," ")
 	req = requests.get(url)
+	if req.text.find("html>")>0:
+		return translate(input)
 	if req.text == '{"errors": {"sentence": "Invalid text value provided"}}' or req.text[1:-3] == '':
 		output=""
 		words=input.split(" ")
