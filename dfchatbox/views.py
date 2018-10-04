@@ -53,13 +53,16 @@ def index(request):
 		# prepoznavanje regije?
 
 		print("message:",message)
-		if (not hasNumbers(message) or message.find("24") > -1) and message.find("NONE") < 0 and message != "reset":
+		if (not hasNumbers(message) or message.find("24") > -1)  or message.find("NONESLO")>0 and message.find("NONE") < 0 and message != "reset":
 			if checkRegion(message):
-				whoosh_data = findSLO(lemmatize(messageSLO))
-				#print("SLO", whoosh_data)
-				if(len(whoosh_data) < 2):
+				if message.find("NONESLO")>0:
+					message=message.replace("NONESLO","")
 					whoosh_data = whoosh(message)
-				#print(whoosh_data)
+				else:
+					whoosh_data = findSLO(lemmatize(messageSLO))
+					if(len(whoosh_data) < 2):
+						whoosh_data = whoosh(message)
+
 				if len(whoosh_data) > 1:
 					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
 				else:
@@ -116,7 +119,7 @@ def index(request):
 					answer = text_answer
 					text_answer = "Našel sem naslednje skupine posegov: "
 					for group in groups:
-						group = requests.get('http://translation-api.docker-e9.ijs.si/translate', params={'sentence':group,'fromLang':'en','toLang':'sl'}).text[1:-3]
+						group = requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + group +'&fromLang=en&toLang=sl').text[1:-3]
 						text_answer += "<br>-" + group
 					text_answer += "<br>" + answer
 				else:
@@ -345,20 +348,23 @@ def findSLO(input):
 	keywords = []
 	results = Procedure.objects.all()
 	for word in words:
-		if word and len(results.filter(lemma__icontains=word+" "))>0:
+		if word and len(word)>1 and len(results.filter(lemma__icontains=word+" "))>0:
 			keywords.append(word)
 	print("keywordsSLO:",keywords)
 	if not keywords:
 		return []
+	badKeywords=True
 	for word in keywords:
-		if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za","biti"]:
+		if word not in ["pri","na","čez","s","do","iz","po","za","biti","ali","ja","ne","no"]:
+			badKeywords=False
 			results = results.filter(lemma__icontains=word+" ")
+		if badKeywords:
+			return []
 	print(len(results))
 	if len(results) < 1:
 		for word in keywords:
-			if word not in ["z", "v","pri","na","čez","s","do","iz","h","k","po","za","biti"]:
+			if word not in ["pri","na","čez","do","iz","po","za","biti","ali","ja","ne","no"]:
 				results |= Procedure.objects.filter(lemma__icontains=word+" ")
-
 	data = []
 	for result in results:
 		dict ={}
@@ -367,7 +373,7 @@ def findSLO(input):
 		data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']=translate(input).replace("'m"," am") + " NONE"
+	none['value']=translate(input).replace("'m"," am") + " NONESLO"
 	data.append(none)
 	return data
 
