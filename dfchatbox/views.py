@@ -119,11 +119,11 @@ def index(request):
 					answer = text_answer
 					text_answer = "Našel sem naslednje skupine posegov: "
 					for group in groups:
-						group = requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + group +'&fromLang=en&toLang=sl').text[1:-3]
+						group = translateToSlo(group)
 						text_answer += "<br>-" + group
 					text_answer += "<br>" + answer
 				else:
-					text_answer = "Našel sem skupino posegov <b>" + requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + groups[0] +'&fromLang=en&toLang=sl').text[1:-3] + "</b>.<br>" + text_answer
+					text_answer = "Našel sem skupino posegov <b>" + translateToSlo(groups[0]) + "</b>.<br>" + text_answer
 			
 			
 		#text_answer = text_answer.replace('\\','\\\\')
@@ -223,6 +223,12 @@ def translate(input):
 		return input
 	return req.text[1:-3].replace("'s"," is").replace("'m"," am").replace("'ve"," have").replace("n't"," not")
 
+def translateToSlo(input):
+	output = requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + input +'&fromLang=en&toLang=sl')
+	if output.find("html") > 0:
+		return translateToSlo(input)
+	return output.text[1:-3]
+
 def standardize_input(input):
 	input = input.lower()
 	return input.replace('arm', 'hand').replace('operation','surgery').replace("'"," ").replace("x-ray","rtg")
@@ -266,7 +272,7 @@ def getKeywords(input):
 	for keyword in words:
 		if not keyword:
 			continue
-		if(SearchQuerySet().filter(content=keyword).count() > 0):
+		if(keyword not in ["like"] and SearchQuerySet().filter(content=keyword).count() > 0):
 			keywords.append(keyword)
 	print("keywords:",keywords)
 	return keywords
