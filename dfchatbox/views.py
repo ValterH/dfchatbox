@@ -378,7 +378,7 @@ def findSLO(input, english):
 	keywords = []
 	results = Procedure.objects.all()
 	for word in words:
-		if word and len(word)>1 and len(results.filter(lemma__icontains=word+" "))>0:
+		if word and len(word)>1 and len(results.filter(lemma__icontains=word))>0:
 			keywords.append(word)
 	print("keywordsSLO:",keywords)
 	if not keywords:
@@ -387,7 +387,7 @@ def findSLO(input, english):
 	for word in keywords:
 		if word not in ["pri","na","čez","s","do","iz","po","za","biti","ali","ja","ne","no"]:
 			badKeywords=False
-			results = results.filter(lemma__icontains=word+" ")
+			results = results.filter(lemma__icontains=word)
 		if badKeywords:
 			return []
 	print(len(results))
