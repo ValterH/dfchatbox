@@ -224,7 +224,7 @@ def translate(input):
 	return req.text[1:-3].replace("'s"," is").replace("'m"," am").replace("'ve"," have").replace("n't"," not")
 
 def translateToSlo(input):
-	output = requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + input +'&fromLang=en&toLang=sl')
+	output = requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + input +'&fromLang=en&toLang=sl').text
 	if output.find("html") > 0:
 		return translateToSlo(input)
 	return output.text[1:-3]
