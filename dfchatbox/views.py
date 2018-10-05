@@ -53,7 +53,7 @@ def index(request):
 		# prepoznavanje regije?
 
 		print("message:",message)
-		if message != "reset" and (not hasNumbers(message) or message.find("24") > -1  or message.find("NONESLO")>0) and message.find("NONE ") < 0:
+		if message != "reset" and (message.find("NONE") < 0 or message.find("NONESLO")>0) and (not hasNumbers(message) or message.find("24") > -1):
 			if checkRegion(message):
 				if message.find("NONESLO")>0:
 					message=message.replace("NONESLO","")
@@ -120,17 +120,17 @@ def index(request):
 					text_answer = "Našel sem naslednje skupine posegov: "
 					for group in groups:
 						group = translateToSlo(group)
-						text_answer += "<br>-" + group
+						text_answer += "<br>-<b>" + group +"</b>"
 					text_answer += "<br>" + answer
 				else:
-					text_answer = "Našel sem skupino posegov <b>" + translateToSlo(groups[0]) + "</b>.<br>" + text_answer
+					text_answer = "Ste mislili:" #Našel sem skupino posegov <b>" + translateToSlo(groups[0]) + "</b>.<br>" + text_answer
 			
 			
 		#text_answer = text_answer.replace('\\','\\\\')
 
 		print(text_answer)
 
-		data = ""
+		data = []
 		response_type = ""
 		url = ""
 
@@ -141,20 +141,19 @@ def index(request):
 		    url = answer_json['result']['fulfillment']['data']['url']
 		    if url[:5] != "https":
 		    	url = "https:" + url[5:]
-
 		if response_type == "procedures":
 			none={}
 			none['name']="Nobeden izmed zgoraj naštetih"
 			none['value']= "NONE"
-			answer_json['result']['fulfillment']['data']['data'] = answer_json['result']['fulfillment']['data']['data'].append(none)
-
+			data.append(none)
+		if text_answer.find("Ste mislili") > -1 or text_answer.find("skupine posegov") > -1 or text_answer.find("Izberi poseg")> -1:
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("Kako hitro potrebujete")>-1:
 			urgencies = [{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"},{"name":"Zelo hitro","value":"very fast"}]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",urgencies))
 
 		if text_answer.find("V kateri regiji iščete?")>-1:
-			print("A")
 			regions = [{ "name": "Vse regije", "value": "all regions" }, { "name": "Gorenjska regija", "value": "Gorenjska" }, { "name": "Goriška regija", "value": "Goriska" }, { "name": "Jugovzhodna Slovenija", "value": "Southeast" }, { "name": "Koroška regija", "value": "Koroška" }, { "name": "Obalno-kraška regija", "value": "Obalno-Kraska" }, { "name": "Osrednjeslovenska regija", "value": "Ljubljana" }, { "name": "Podravska regija", "value": "Podravska" }, { "name": "Pomurska regija", "value": "Pomurje" }, { "name": "Posavska regija", "value": "Posavska region" }, { "name": "Primorsko-notranjska regija", "value": "Primorsko-Inner" }, { "name": "Savinjska regija", "value": "Savinjska" }, { "name": "Zasavska regija", "value": "Zasavska" }]
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",regions))
 
@@ -165,7 +164,7 @@ def index(request):
 			data = [{"name":"DA", "value":value},{"name":"NE","value":"reset"}]
 			response_type="procedures"
 
-		if text_answer.find("Našel sem naslednje posege...")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosim ponovno začnite z iskanjem":
+		if text_answer.find("sem našel v naslednjih ustanovah:")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosim ponovno začnite z iskanjem":
 			if 'regions' in OGrequest.session:
 				del OGrequest.session['regions']
 			if 'procedure' in OGrequest.session:
@@ -175,8 +174,8 @@ def index(request):
 			OGrequest.session.modified = True
 			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
 				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
-		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
-		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
+		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Zgleda, da je prišlo do napake.","error",[]))
 	else:
 		return render(request,'dfchatbox/index.html')
 
@@ -374,7 +373,7 @@ def findSLO(input, english):
 	for result in results:
 		dict ={}
 		dict['name']= result.nameSLO
-		dict['value']= result.procedure_id
+		dict['value']= english + " " + result.procedure_id
 		data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
