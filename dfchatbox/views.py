@@ -36,7 +36,7 @@ def index(request):
 			help ="<b>Da vam pomagam najti razpoložljivo storitev potrebujem naslednje informacije:<br><em>-kateri poseg iščete (npr. rentgen kolena)<br><em>-v kateri regiji iščete (npr. Gorenjska)<br><em>-kako nujno potrebujete poseg (npr. redno)<br><br><small>Vendar ne skrbite za regijo in nujnost vas bom povprašal sam.<br>Vi mi samo povejte katero storitev iščete."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(help,"none",[]))
 		messageSLO = message
-		if not hasNumbers(message) or message.find("24")>-1 or message=="reset":
+		if not hasNumbers(message) or message.find("24")>-1 and message!="reset":
 			message=translate(message)
 
 		#print("user input: ", message)
@@ -53,13 +53,13 @@ def index(request):
 		# prepoznavanje regije?
 
 		print("message:",message)
-		if (not hasNumbers(message) or message.find("24") > -1)  or message.find("NONESLO")>0 and message.find("NONE") < 0 and message != "reset":
+		if message != "reset" and (not hasNumbers(message) or message.find("24") > -1  or message.find("NONESLO")>0) and message.find("NONE ") < 0:
 			if checkRegion(message):
 				if message.find("NONESLO")>0:
 					message=message.replace("NONESLO","")
 					whoosh_data = whoosh(message)
 				else:
-					whoosh_data = findSLO(lemmatize(messageSLO))
+					whoosh_data = findSLO(lemmatize(messageSLO), message)
 					if(len(whoosh_data) < 2):
 						whoosh_data = whoosh(message)
 
@@ -219,9 +219,9 @@ def translate(input):
 				#print(word)
 				if word:
 					output+=translate(word)+" "
-			return output
+			return output.replace("'s"," is").replace("'m"," am").replace("'ve"," have").replace("n't"," not")
 		return input
-	return req.text[1:-3]
+	return req.text[1:-3].replace("'s"," is").replace("'m"," am").replace("'ve"," have").replace("n't"," not")
 
 def standardize_input(input):
 	input = input.lower()
@@ -331,18 +331,17 @@ def lemmatize(input):
 	soup = BeautifulSoup(html,"html.parser")
 	xml=soup.find_all('pre')[0].text
 	root = etree.fromstring(xml)
-	els = root[0][0][0][0]
-	i = 0
-	for el in els:
-		if i%2==0:
+	sentences = root[0][0][0]
+	exceptions=[]
+	for els in sentences:
+		for el in els:
 			try: 
 				lemmatized += el.attrib['lemma'] + " "
-			except: 
-				print("element has no lemma")
-		i+=1
+			except:
+				exceptions.append(el)
 	return lemmatized
 
-def findSLO(input):
+def findSLO(input, english):
 	words = input.split(" ")
 
 	keywords = []
@@ -373,7 +372,7 @@ def findSLO(input):
 		data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']=translate(input).replace("'m"," am") + " NONESLO"
+	none['value']= english + " NONESLO"
 	data.append(none)
 	return data
 
