@@ -227,7 +227,7 @@ def translateToSlo(input):
 	output = requests.get('http://translation-api.docker-e9.ijs.si/translate?sentence=' + input +'&fromLang=en&toLang=sl').text
 	if output.find("html") > 0:
 		return translateToSlo(input)
-	return output.text[1:-3]
+	return output[1:-3]
 
 def standardize_input(input):
 	input = input.lower()
