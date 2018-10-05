@@ -52,7 +52,9 @@ def index(request):
 		# TODO:
 		# prepoznavanje regije?
 
+
 		print("message:",message)
+		print("messageSLO:",messageSLO)
 		if message != "reset" and (message.find("NONE") < 0 or message.find("NONESLO")>0) and (not hasNumbers(message) or message.find("24") > -1):
 			if checkRegion(message):
 				if message.find("NONESLO")>0:
@@ -96,6 +98,19 @@ def index(request):
 		
 		groups = []
 		procedure =""
+		
+		if not 'urgency' in OGrequest.session and message != 'reset':
+			try:
+				OGrequest.session['urgency']=answer_json['result']['parameters']['urgency']
+			except:
+				print("No urgency")
+
+		if not 'region' in OGrequest.session and message != 'reset':
+			try:
+				OGrequest.session['region']=answer_json['result']['parameters']['region']
+			except:
+				print("No region")
+
 		if not 'procedure' in OGrequest.session and message != 'reset':
 			if not 'group' in OGrequest.session:
 				try: 
@@ -144,9 +159,13 @@ def index(request):
 		if response_type == "procedures":
 			none={}
 			none['name']="Nobeden izmed zgoraj naštetih"
-			none['value']= "NONE"
+			none['value']= message + " NONE"
 			data.append(none)
 		if text_answer.find("Ste mislili") > -1 or text_answer.find("skupine posegov") > -1 or text_answer.find("Izberi poseg")> -1:
+			if OGrequest.session['urgency'] or OGrequest.session['region']:
+				for item in data:
+
+					item['value'] = OGrequest.session['urgency'] + " " + OGrequest.session['region'] + " " + item['value']
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("Kako hitro potrebujete")>-1:
@@ -163,6 +182,7 @@ def index(request):
 			value="A " + answer_json['result']['parameters']['urgency'] + " " + answer_json['result']['parameters']['procedure']
 			data = [{"name":"DA", "value":value},{"name":"NE","value":"reset"}]
 			response_type="procedures"
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("sem našel v naslednjih ustanovah:")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosim ponovno začnite z iskanjem":
 			if 'regions' in OGrequest.session:
@@ -171,6 +191,10 @@ def index(request):
 				del OGrequest.session['procedure']
 			if 'group' in OGrequest.session:
 				del OGrequest.session['group']
+			if 'urgency' in OGrequest.session['urgency']:
+				del OGrequest.session['group']
+			if 'region' in OGrequest.session:
+				del OGrequest.session['region']
 			OGrequest.session.modified = True
 			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
 				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
@@ -280,9 +304,11 @@ def hasNumbers(inputString):
 	return any(char.isdigit() for char in inputString)
 
 def checkRegion(message):
+	if message in ["all regions","Gorenjska","Goriska","Southeast","Koroška","Obalno-Kraska","Ljubljana","Podravska", "Pomurje", "Posavska region","Primorsko-Inner","Savinjska","Zasavska"]:
+		return False
 	if message.find('regions') > -1:
-		message = message.replace('regions','')
-		data = whoosh(message)
+		wsh = message.replace('regions','')
+		data = whoosh(wsh)
 		if len(data) > 1:
 			return True
 		return False
@@ -372,7 +398,7 @@ def findSLO(input, english):
 	data = []
 	for result in results:
 		dict ={}
-		dict['name']= result.nameSLO
+		dict['name']= result.nameSLO.replace('"','')
 		dict['value']= english + " " + result.procedure_id
 		data.append(dict)
 	none={}
