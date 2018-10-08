@@ -454,7 +454,7 @@ function communicate(message,j){
 
             typing(0,"others");
             console.log(err);
-            var reply_others = '<div class="socketchatbox-message-wrapper" id="wrapper-others' + j + '"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime">' + date + '</span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">Se lahko izrazite kako drugače? </span></div></div>';
+            var reply_others = '<div class="socketchatbox-message-wrapper" id="wrapper-others' + j + '"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime">' + date + '</span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">' + response['text_answer'] +' </span></div></div>';
 
             $(".socketchatbox-chatArea").append(reply_others);
             saveElement(reply_others);

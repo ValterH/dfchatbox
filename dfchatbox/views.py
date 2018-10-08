@@ -55,15 +55,15 @@ def index(request):
 
 		print("message:",message)
 		print("messageSLO:",messageSLO)
-		if message != "reset" and (message.find("NONE") < 0 and not isUrgency(message) or message.find("NONESLO")>0) and (not hasNumbers(message) or message.find("24") > -1):
+		if message != "reset" and (message.find("NONE") < 0 or message.find("NONESLO")>0) and not isUrgency(message) and (not hasNumbers(message) or message.find("24") > -1):
 			if checkRegion(message):
 				if message.find("NONESLO")>0:
 					message=message.replace("NONESLO","")
-					whoosh_data = whoosh(message)
-				else:
 					whoosh_data = findSLO(lemmatize(messageSLO), message)
+				else:
+					whoosh_data = whoosh(message)
 					if(len(whoosh_data) < 2):
-						whoosh_data = whoosh(message)
+						whoosh_data = findSLO(lemmatize(messageSLO), message)
 
 				if len(whoosh_data) > 1:
 					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
@@ -199,7 +199,10 @@ def index(request):
 			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
 				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
-		return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Zgleda, da je prišlo do napake.","error",[]))
+		if text_answer:
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
+		else:
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Zgleda, da je prišlo do napake.","error",[]))
 	else:
 		return render(request,'dfchatbox/index.html')
 
@@ -284,7 +287,7 @@ def whoosh(input):
 			#print(result.score)
 		none={}
 		none['name']="Nobeden izmed zgoraj naštetih"
-		none['value']=input + " NONE"
+		none['value']=input + " NONESLO"
 		data.append(none)
 
 	return data
@@ -382,7 +385,7 @@ def findSLO(input, english):
 	results = Procedure.objects.all()
 	for word in words:
 		if word and len(word)>1:
-			if (len(word)>3 and len(results.filter(lemma__icontains=word))>0) or len(results.filter(lemma__icontains=word+" "))>0:
+			if (len(word)>3 and len(results.filter(lemma__icontains=word))>0) or len(results.filter(lemma__icontains=" " +word+" "))>0:
 				keywords.append(word)
 	print("keywordsSLO:",keywords)
 	if not keywords:
@@ -410,7 +413,7 @@ def findSLO(input, english):
 		data.append(dict)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
-	none['value']= english + " NONESLO"
+	none['value']= english + " NONE"
 	data.append(none)
 	return data
 
