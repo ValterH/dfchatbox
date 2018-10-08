@@ -55,7 +55,7 @@ def index(request):
 
 		print("message:",message)
 		print("messageSLO:",messageSLO)
-		if message != "reset" and (message.find("NONE") < 0 or message.find("NONESLO")>0) and (not hasNumbers(message) or message.find("24") > -1):
+		if message != "reset" and (message.find("NONE") < 0 and not isUrgency(message) or message.find("NONESLO")>0) and (not hasNumbers(message) or message.find("24") > -1):
 			if checkRegion(message):
 				if message.find("NONESLO")>0:
 					message=message.replace("NONESLO","")
@@ -314,6 +314,9 @@ def checkRegion(message):
 		return False
 	return True
 
+def isUrgency(input):
+	return input in ['normal','fast','very fast']
+
 def query(set,keywords):
 	if len(keywords) == 1:
 		return set.filter(content=keywords[0])
@@ -392,8 +395,8 @@ def findSLO(input, english):
 				results = results.filter(lemma__icontains=word)
 			else:
 				results = results.filter(lemma__icontains=word+" ")
-		if badKeywords:
-			return []
+	if badKeywords:
+		return []
 	print(len(results))
 	if len(results) < 1:
 		for word in keywords:
