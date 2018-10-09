@@ -28,6 +28,7 @@ from haystack.query import SearchQuerySet
 @require_http_methods(['POST','GET'])
 def index(request):
 	if request.method == 'POST':
+		OGrequest = request
 		message = request.POST['message']
 		sessionID = request.POST['sessionID']
 
@@ -36,6 +37,22 @@ def index(request):
 			help ="<b>Da vam pomagam najti razpoložljivo storitev potrebujem naslednje informacije:<br><em>-kateri poseg iščete (npr. rentgen kolena)<br><em>-v kateri regiji iščete (npr. Gorenjska)<br><em>-kako nujno potrebujete poseg (npr. redno)<br><br><small>Vendar ne skrbite za regijo in nujnost vas bom povprašal sam.<br>Vi mi samo povejte katero storitev iščete."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(help,"none",[]))
 		messageSLO = message
+
+		if message == "!nujnosti":
+			data = OGrequest.session['data']
+			data_str = " " + data['procedure'] + " " + data['region']
+			urgencies = [{"name":"Redno","value":"3"},{"name":"Hitro","value":"2"},{"name":"Zelo hitro","value":"7"}]
+			remove = []
+			print(data['urgency'])
+			for urgency in urgencies:
+				if urgency['value'] == data['urgency']:
+					remove.append(urgency)
+				else:
+					urgency['value'] += data_str
+			for item in remove:
+				urgencies.remove(item)
+			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Kako hitro potrebujete poseg?","procedures",urgencies))
+
 		if not hasNumbers(message) or message.find("24")>-1 and message!="reset":
 			message=translate(message)
 
@@ -55,21 +72,34 @@ def index(request):
 
 		print("message:",message)
 		print("messageSLO:",messageSLO)
-		if message != "reset" and (message.find("NONE") < 0 or message.find("NONESLO")>0) and not isUrgency(message) and (not hasNumbers(message) or message.find("24") > -1):
-			if checkRegion(message):
-				if message.find("NONESLO")>0:
+
+
+		if message != "reset" and (message.find("NONE") < 0 or message.find("NONESLO")>-1) and not isUrgency(message) and (not hasNumbers(message) or message.find("24") > -1):
+			if not isRegion(messageSLO, message):
+				if message.find("NONESLO")>-1:
 					message=message.replace("NONESLO","")
 					whoosh_data = findSLO(lemmatize(messageSLO), message)
+					OGrequest.session['procedures'] = notRight(OGrequest.session['procedures'],whoosh_data)
+					if len(whoosh_data) > 1:
+						return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
 				else:
-					whoosh_data = whoosh(message)
+					whoosh_data = whoosh(message, messageSLO)
 					if(len(whoosh_data) < 2):
 						whoosh_data = findSLO(lemmatize(messageSLO), message)
+					if len(whoosh_data) > 1:
+						if not 'procedures' in OGrequest.session:
+							OGrequest.session['procedures'] = notRight([],whoosh_data)
+						else:
+							OGrequest.session['procedures'] = notRight(OGrequest.session['procedures'],whoosh_data)
+						if len(whoosh_data) > 1:
+							return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
+			message+= " NONE"
 
-				if len(whoosh_data) > 1:
-					return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Ste mislili:","procedures",whoosh_data))
-				else:
-					message+= " NONE"
 		print(message)
+		#if 'procedures' in OGrequest.session:
+		#	print('not right:',OGrequest.session['procedures'],"\n")
+		#else: 
+		#	print("All right")
 
 		#THINKEHR
 		#CLIENT_ACCESS_TOKEN = "631305ebeec449618ddeeb2f96a681e9"
@@ -99,19 +129,21 @@ def index(request):
 		groups = []
 		procedure =""
 		
-		if not 'urgency' in OGrequest.session and message != 'reset':
+		if  message != 'reset':
 			try:
 				OGrequest.session['urgency']=answer_json['result']['parameters']['urgency']
+				print("urg:",OGrequest.session['urgency'])
 			except:
 				print("No urgency")
 
-		if not 'region' in OGrequest.session and message != 'reset':
+		if  message != 'reset':
 			try:
 				OGrequest.session['region']=answer_json['result']['parameters']['region']
+				print("reg:",OGrequest.session['region'])
 			except:
 				print("No region")
 
-		if not 'procedure' in OGrequest.session and message != 'reset':
+		if  message != 'reset':
 			if not 'group' in OGrequest.session:
 				try: 
 					groups = answer_json['result']['parameters']['group']
@@ -157,15 +189,19 @@ def index(request):
 		    if url[:5] != "https":
 		    	url = "https:" + url[5:]
 		if response_type == "procedures":
+			if 'procedures' in OGrequest.session:
+				OGrequest.session['procedures'] = notRight(OGrequest.session['procedures'],data)
+			else:
+				OGrequest.session['procedures'] = notRight([],data)
 			none={}
 			none['name']="Nobeden izmed zgoraj naštetih"
-			none['value']= message + " NONE"
+			none['value']= "reset"
 			data.append(none)
 		if text_answer.find("Ste mislili") > -1 or text_answer.find("skupine posegov") > -1 or text_answer.find("Izberi poseg")> -1:
 			if OGrequest.session['urgency'] or OGrequest.session['region']:
 				for item in data:
-
-					item['value'] = OGrequest.session['urgency'] + " " + OGrequest.session['region'] + " " + item['value']
+					if item['value'] != "reset":
+						item['value'] = OGrequest.session['urgency'] + " " + OGrequest.session['region'] + " " + item['value']
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("Kako hitro potrebujete")>-1:
@@ -184,7 +220,18 @@ def index(request):
 			response_type="procedures"
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
-		if text_answer.find("sem našel v naslednjih ustanovah:")>-1 or text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." or text_answer == "Prosim ponovno začnite z iskanjem":
+		if response_type == 'waitingTimes' or text_answer == "Prosim ponovno začnite z iskanjem":
+			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
+				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
+			else:
+				if text_answer != "Prosim ponovno začnite z iskanjem":
+					text_answer += "<br><i><small>Če želite iskati pod drugimi nujnostmi napišite: !nujnosti</small></i>"
+					current_data={}
+					current_data['procedure']=answer_json['result']['parameters']['procedure']
+					current_data['region']=answer_json['result']['parameters']['region']
+					current_data['urgency']=answer_json['result']['parameters']['urgency']
+					OGrequest.session['data']=current_data
+
 			if 'regions' in OGrequest.session:
 				del OGrequest.session['regions']
 			if 'procedure' in OGrequest.session:
@@ -195,9 +242,9 @@ def index(request):
 				del OGrequest.session['group']
 			if 'region' in OGrequest.session:
 				del OGrequest.session['region']
+			if 'procedures' in OGrequest.session:
+				del OGrequest.session['procedures']
 			OGrequest.session.modified = True
-			if text_answer == "Poseg, ki ga iščete pod trenutnimi pogoji ni na voljo. Poskusite iskati v drugih regijah ali pod drugo nujnostjo." and answer_json['result']['parameters']['region'] == "A":
-				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 		if text_answer:
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
@@ -269,25 +316,34 @@ def standardize_db(procedures):
 		procedure.save()
 	return
 
-def whoosh(input):
+def notRight(incorrect, data):
+	remove = []
+	for item in data:
+		if item['name'] != 'Nobeden izmed zgoraj naštetih':
+			if item['name'] in incorrect:
+				remove.append(item)
+			incorrect.append(item['name'])
+	for item in remove:
+		data.remove(item)
+	return incorrect
+
+def whoosh(input, inSLO):
 	input = standardize_input(input)
 	keywords = getKeywords(input)
 	all_results = SearchQuerySet().all()
 	data = []
 	if keywords:
 		all_results = query(all_results, keywords)
-		# for keyword in keywords:
-		# 	all_results = all_results.filter(content=keyword)
+		print(len(all_results))
 		for result in all_results:
 			if result.object:
 				dict ={}
-				dict['name']=result.object.nameSLO
+				dict['name']=result.object.nameSLO.replace('"','')
 				dict['value']=input + " " + result.object.procedure_id
 				data.append(dict)
-			#print(result.score)
 		none={}
 		none['name']="Nobeden izmed zgoraj naštetih"
-		none['value']=input + " NONESLO"
+		none['value']=inSLO + " NONESLO"
 		data.append(none)
 
 	return data
@@ -306,16 +362,16 @@ def getKeywords(input):
 def hasNumbers(inputString):
 	return any(char.isdigit() for char in inputString)
 
-def checkRegion(message):
-	if message in ["all regions","Gorenjska","Goriska","Southeast","Koroška","Obalno-Kraska","Ljubljana","Podravska", "Pomurje", "Posavska region","Primorsko-Inner","Savinjska","Zasavska"]:
-		return False
-	if message.find('regions') > -1:
-		wsh = message.replace('regions','')
-		data = whoosh(wsh)
+def isRegion(SLO, ENG):
+	if SLO in ["all regions", "Gorenjska", "Goriska", "Southeast", "Koroška", "Obalno-Kraska", "Ljubljana", "Podravska", "Pomurje", "Posavska region", "Primorsko-Inner","Savinjska", "Zasavska"]:
+		return True
+	if ENG.find('regions') > -1:
+		wsh = ENG.replace('regions','')
+		data = whoosh(wsh, SLO)
 		if len(data) > 1:
-			return True
-		return False
-	return True
+			return False
+		return True
+	return False
 
 def isUrgency(input):
 	return input in ['normal','fast','very fast']
@@ -400,17 +456,17 @@ def findSLO(input, english):
 				results = results.filter(lemma__icontains=word+" ")
 	if badKeywords:
 		return []
-	print(len(results))
 	if len(results) < 1:
 		for word in keywords:
 			if word not in ["pri","na","čez","do","iz","po","za","biti","ali","ja","ne","no"]:
 				results |= Procedure.objects.filter(lemma__icontains=word+" ")
 	data = []
+	print(len(results))
 	for result in results:
-		dict ={}
-		dict['name']= result.nameSLO.replace('"','')
-		dict['value']= english + " " + result.procedure_id
-		data.append(dict)
+		dicti ={}
+		dicti['name']= result.nameSLO.replace('"','')
+		dicti['value']= english + " " + result.procedure_id
+		data.append(dicti)
 	none={}
 	none['name']="Nobeden izmed zgoraj naštetih"
 	none['value']= english + " NONE"
