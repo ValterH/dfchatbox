@@ -40,7 +40,7 @@ def index(request):
 
 		if message == "!nujnosti":
 			data = OGrequest.session['data']
-			data_str = " " + data['procedure'] + " " + data['region']
+			data_str = data['procedure'] + "; " + data['region'] + "; "
 			urgencies = [{"name":"Redno","value":"3"},{"name":"Hitro","value":"2"},{"name":"Zelo hitro","value":"7"}]
 			remove = []
 			print(data['urgency'])
@@ -48,7 +48,7 @@ def index(request):
 				if urgency['value'] == data['urgency']:
 					remove.append(urgency)
 				else:
-					urgency['value'] += data_str
+					urgency['value'] = data_str + urgency['value'] +";"
 			for item in remove:
 				urgencies.remove(item)
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Kako hitro potrebujete poseg?","procedures",urgencies))
@@ -201,7 +201,7 @@ def index(request):
 			if OGrequest.session['urgency'] or OGrequest.session['region']:
 				for item in data:
 					if item['value'] != "reset":
-						item['value'] = OGrequest.session['urgency'] + " " + OGrequest.session['region'] + " " + item['value']
+						item['value'] += "; " + OGrequest.session['region'] + "; " + OGrequest.session['urgency'] + ";"
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("Kako hitro potrebujete")>-1:
