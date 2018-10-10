@@ -234,7 +234,7 @@ def index(request):
 					OGrequest.session['data']=current_data
 			resetSession(OGrequest)
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
-		resetSession()
+		resetSession(OGrequest)
 		if text_answer:
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
 		else:
