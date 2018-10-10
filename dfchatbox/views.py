@@ -471,8 +471,8 @@ def resetSession(request):
 		del request.session['procedure']
 	if 'group' in request.session:
 		del request.session['group']
-	if 'urgency' in request.session['urgency']:
-		del request.session['group']
+	if 'urgency' in request.session:
+		del request.session['urgency']
 	if 'region' in request.session:
 		del request.session['region']
 	if 'procedures' in request.session:
