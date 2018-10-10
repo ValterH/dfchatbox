@@ -40,7 +40,8 @@ def index(request):
 
 		if message == "!nujnosti":
 			data = OGrequest.session['data']
-			data_str = data['procedure'] + "; " + data['region'] + "; "
+			region = getRegion(data['region'])
+			data_str = data['procedure'] + "; " + region + "; "
 			urgencies = [{"name":"Redno","value":"3"},{"name":"Hitro","value":"2"},{"name":"Zelo hitro","value":"7"}]
 			remove = []
 			print(data['urgency'])
@@ -201,7 +202,7 @@ def index(request):
 			if OGrequest.session['urgency'] or OGrequest.session['region']:
 				for item in data:
 					if item['value'] != "reset":
-						item['value'] += "; " + OGrequest.session['region'] + "; " + OGrequest.session['urgency'] + ";"
+						item['value'] += "; " + getRegion(OGrequest.session['region']) + "; " + OGrequest.session['urgency'] + ";"
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("Kako hitro potrebujete")>-1:
@@ -231,21 +232,9 @@ def index(request):
 					current_data['region']=answer_json['result']['parameters']['region']
 					current_data['urgency']=answer_json['result']['parameters']['urgency']
 					OGrequest.session['data']=current_data
-
-			if 'regions' in OGrequest.session:
-				del OGrequest.session['regions']
-			if 'procedure' in OGrequest.session:
-				del OGrequest.session['procedure']
-			if 'group' in OGrequest.session:
-				del OGrequest.session['group']
-			if 'urgency' in OGrequest.session['urgency']:
-				del OGrequest.session['group']
-			if 'region' in OGrequest.session:
-				del OGrequest.session['region']
-			if 'procedures' in OGrequest.session:
-				del OGrequest.session['procedures']
-			OGrequest.session.modified = True
+			resetSession(OGrequest)
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
+		resetSession()
 		if text_answer:
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
 		else:
@@ -453,7 +442,9 @@ def findSLO(input, english):
 			if len(word)>3:
 				results = results.filter(lemma__icontains=word)
 			else:
-				results = results.filter(lemma__icontains=word+" ")
+				results = results.filter(lemma__icontains=" "+word)
+				if not results:
+					results = results.filter(lemma__icontains=word+" ")
 	if badKeywords:
 		return []
 	if len(results) < 1:
@@ -473,4 +464,25 @@ def findSLO(input, english):
 	data.append(none)
 	return data
 
+def resetSession(request):
+	if 'regions' in request.session:
+		del request.session['regions']
+	if 'procedure' in request.session:
+		del request.session['procedure']
+	if 'group' in request.session:
+		del request.session['group']
+	if 'urgency' in request.session['urgency']:
+		del request.session['group']
+	if 'region' in request.session:
+		del request.session['region']
+	if 'procedures' in request.session:
+		del request.session['procedures']
+	request.session.modified = True
+	return
 
+def getRegion(reg):
+	regions = [{"id":"A","value":"all regions"}, 	{ "id":"9", "value": "Gorenjska" }, { "id":"11", "value": "Goriska" }, { "id":"7", "value": "Southeast" }, { "id":"1", "value": "Koroška" }, { "id":"12", "value": "Obalno-Kraska" }, { "id":"8", "value": "Ljubljana" }, { "id":"3" , "value": "Podravska" }, { "id":"2", "value": "Pomurje" }, { "id":"6", "value": "Posavska region" }, { "id":"10", "value": "Primorsko-Inner" }, { "id":"4", "value": "Savinjska" }, { "id":"5" , "value": "Zasavska" }]
+	for region in regions:
+		if region["id"] == reg:
+			return region["value"]
+	return reg
