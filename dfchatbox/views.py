@@ -55,7 +55,12 @@ def index(request):
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Kako hitro potrebujete poseg?","procedures",urgencies))
 
 		if not hasNumbers(message) or message.find("24")>-1 and message!="reset":
-			message=translate(message)
+			if messageSLO.find("NONESLO") > -1:
+				message = translate(message.replace("NONESLO",""))+"NONESLO"
+			elif messageSLO.find("NONE") > -1:
+				message = translate(message.replace("NONE",""))+"NONE"
+			else:
+				message=translate(message)
 
 		#print("user input: ", message)
 
