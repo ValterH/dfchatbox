@@ -56,9 +56,9 @@ def index(request):
 
 		if not hasNumbers(message) or message.find("24")>-1 and message!="reset":
 			if messageSLO.find("NONESLO") > -1:
-				message = translate(message.replace("NONESLO",""))+"NONESLO"
+				message = translate(message.replace("NONESLO",""))+" NONESLO"
 			elif messageSLO.find("NONE") > -1:
-				message = translate(message.replace("NONE",""))+"NONE"
+				message = translate(message.replace("NONE",""))+" NONE"
 			else:
 				message=translate(message)
 

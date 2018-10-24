@@ -327,47 +327,6 @@ function communicate(message,j){
                 $(".socketchatbox-chatArea").append('<button name="reset" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + (i+3) + (j+3) + '" type="button">NE</button>');
             }
 
-            else if (response_type == "userInfo") {
-                //DATA IS USER INFO
-                var keys = Object.keys(data);
-                var slo_keys = ["Ime","Priimek","Spol","Datum rojstva"];
-
-                if (data['gender'] == "MALE"){
-                    data[keys[1]] = "Moški";
-                }
-                else {
-                    data['gender'] = "Ženski";
-                };
-
-
-                var oldDateFormat = new Date(data['dateofbirth']);
-                data['dateofbirth'] = oldDateFormat.toLocaleDateString();
-
-                reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:2%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
-
-                //$(".socketchatbox-chatArea").append( '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:2%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others"></span></div></div>');
-
-                for (var l = 0; l < keys.length; l++) {
-                    reply_others += slo_keys[l] + ": " + data[keys[l]] + "<br>"
-                        //$("#data" + j + i).append(slo_keys[l] + ": " + data[keys[l]] + "<br>");
-                };
-
-                reply_others += '</span></div></div>';
-
-                $(".socketchatbox-chatArea").append(reply_others);
-
-                saveElement(reply_others);
-
-                i+=1;
-
-                disable_input(false);
-
-                $("#inputField").focus();
-
-                document.getElementById("data" + j + (i-1)).scrollIntoView({behavior: "smooth"});
-
-            }
-
             else if (response_type == "procedures") {
                 //DATA GIVES OPTIONS FOR USER
                 first = i.toString() + j.toString();
