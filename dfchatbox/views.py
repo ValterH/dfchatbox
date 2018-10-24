@@ -208,7 +208,8 @@ def index(request):
 				for item in data:
 					if item['value'] != "reset":
 						item['value'] += "; " + getRegion(OGrequest.session['region']) + "; " + OGrequest.session['urgency'] + ";"
-			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
+			if data:
+				return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 
 		if text_answer.find("Kako hitro potrebujete")>-1:
 			urgencies = [{"name":"Redno","value":"normal"},{"name":"Hitro","value":"fast"},{"name":"Zelo hitro","value":"very fast"}]
