@@ -269,70 +269,7 @@ function communicate(message,j){
             data = JSON.parse(response['data'].replace(/'/g, '"'));
             console.log(data)
             response_type = response['response_type'];
-            if (response_type == "list") {
-                //DATA IS LIST OF JSON OBJECTS
-                console.log(data.length);
-                console.log(data[0]);
-                for (var k = 0; k < data.length; k++) {
-                    var keys = Object.keys(data[k]);
-                    var slo_keys = ["Datum","Ime","Vrednost"];
-
-                    var oldDateFormat = new Date(data[k]['date']);
-                    data[k]['date'] = oldDateFormat.toLocaleDateString();
-
-                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:200px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
-
-                    //$(".socketchatbox-chatArea").append( '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:200px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others"></span></div></div>');
-
-                    for (var l = 0; l < keys.length; l++) {
-                        reply_others += slo_keys[l] + ": " + data[k][keys[l]] + "<br>";
-                        //$("#data" + j + i).append(keys[l] + ": " + data[k][keys[l]] + "<br>");
-                    };
-
-                    reply_others += '</span></div></div>';
-
-                    $(".socketchatbox-chatArea").append(reply_others);
-
-                    saveElement(reply_others);
-
-                    i+=1;
-                }
-                disable_input(false);
-
-                $("#inputField").focus();
-            }
-
-            else if (response_type == "entry") {
-                //DATA IS DICTIONARY
-                console.log("entry");
-                var keys = Object.keys(data);
-                console.log(keys);
-
-                if (response['tree_url']) {
-                    $("body").append('<iframe frameborder="0" style="overflow:hidden;height:100%;width:100%" id="URLiFrame" src="' + response['tree_url'] + '" height="100%" width="100%"></iframe>')
-                }
-
-                for (var k = 0; k < keys.length; k++) {
-
-                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
-
-                    reply_others += keys[k] + ": " + data[keys[k]] + "<br>";
-
-
-                    reply_others += '</span></div></div>';
-
-                    $(".socketchatbox-chatArea").append(reply_others);
-
-                    saveElement(reply_others);
-
-                    i+=1;
-                }
-                disable_input(false);
-
-                $("#inputField").focus();
-            }
-            
-            else if (response_type == "waitingTimes") {
+            if (response_type == "waitingTimes") {
                     //DATA IS LIST OF JSON OBJECTS
                     for (var k = 0; k < data.length; k++) {
                     var keys = ["hospital","reception","email","phone"]
@@ -385,6 +322,9 @@ function communicate(message,j){
                     $("#inputField").focus();
                     document.getElementById("wrapper" + last).scrollIntoView({behavior: "smooth"});
                 }
+                $(".socketchatbox-chatArea").append('<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + (j+1) + (i+1) + '"><div id="holder' + (j+1) + (i+1) + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:300px;" id="question" class="socketchatbox-messageBody socketchatbox-messageBody-others">Želite iskati pod drugimi nujnostmi?</span></div></div>');
+                $(".socketchatbox-chatArea").append('<button name="!nujnosti" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + (i+2) + (j+2) + '" type="button">DA</button>');
+                $(".socketchatbox-chatArea").append('<button name="reset" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + (i+3) + (j+3) + '" type="button">NE</button>');
             }
 
             else if (response_type == "userInfo") {

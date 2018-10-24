@@ -231,7 +231,6 @@ def index(request):
 				text_answer = "Žal zgleda, da poseg ki ga iščete ni na voljo v nobeni izmed objavljenih ustanov."
 			else:
 				if text_answer != "Prosim ponovno začnite z iskanjem":
-					text_answer += "<br><i><small>Če želite iskati pod drugimi nujnostmi napišite: !nujnosti</small></i>"
 					current_data={}
 					current_data['procedure']=answer_json['result']['parameters']['procedure']
 					current_data['region']=answer_json['result']['parameters']['region']
