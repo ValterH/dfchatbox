@@ -22,6 +22,9 @@ $(document).ready(function(){
     $(".socketchatbox-chatArea").append(greeting);
     saveElement(greeting);
     j=1;
+    setTimeout(function() {
+        reload_session_storage();
+    }, 100);
 });
 
 $(".socketchatbox-page").keydown(function(t){
@@ -278,7 +281,7 @@ function communicate(message,j){
                     var oldDateFormat = new Date(data[k]['date']);
                     data[k]['date'] = oldDateFormat.toLocaleDateString();
 
-                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:300px;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
+                    var reply_others = '<div style="padding:0;" class="socketchatbox-message-wrapper" id="wrapper' + j + i + '"><div id="holder' + j + i + '" class="socketchatbox-message socketchatbox-message-others"><span style="margin-top:1%;margin-bottom:1%;width:100%;" id="data' + j + i + '" class="socketchatbox-messageBody socketchatbox-messageBody-others">'
 
 
                     for (var l = 0; l < keys.length; l++) {
@@ -330,6 +333,9 @@ function communicate(message,j){
             else if (response_type == "procedures") {
                 //DATA GIVES OPTIONS FOR USER
                 first = i.toString() + j.toString();
+                if (data.length > 10) {
+                    $(".socketchatbox-chatArea").append('<div><input type="text" class="search_box" onkeyup="findProcedure()" placeholder="Išči"></input></div>')
+                }
                 for (var k = 0; k < data.length; k++) {
                     $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
                     i += 1;
@@ -372,25 +378,6 @@ function communicate(message,j){
     //});
 };
 
-//SHOWS AND HIDES CHATBOX
-$("#socketchatbox-top").click(function(){
-    if ($("#socketchatbox-body").is(":visible")){
-        $("#socketchatbox-showHideChatbox").text("↑");
-    }
-    else {
-        $("#socketchatbox-showHideChatbox").text("↓");
-        //LOAD SESSION STORAGE IF PAGE REFRESHED
-        
-    }
-
-    $("#socketchatbox-body").toggle();
-
-    setTimeout(function() {
-        reload_session_storage();
-    }, 100);
-
-    $("#inputField").focus();
-});
 
 //PROCESSES DATA FROM INPUT FIELD WHEN USER CLICKS ENTER
 $(".socketchatbox-page").keydown(function(t){
@@ -439,11 +426,12 @@ $("#socketchatbox-sendFileBtn").click(function(t){
 });
 
 //REMOVES CHOICE BUTTONS
-$(document).on("click", ".choice_btn", function(){
+$(document).on("click", ".choice_btn", ".search_box", function(){
     message1 = document.getElementById(event.target.id).name;
     message2 = document.getElementById(event.target.id).innerHTML;
     message = [message1,message2];
     $(".choice_btn").fadeOut(100, function(){ $(this).remove();});
+    $(".search_box").fadeOut(100, function(){ $(this).remove();});
 
     communicate(message,j);
     j += 1;
@@ -487,100 +475,21 @@ $(document).mouseup(function() {
     i = -1
 });
 
-//OLD DIALOGFLOW RESPONSE FUNCTION
+function findProcedure () {
+    // Declare variables
+    var input, filter, ul, li, a, i;
+    input = document.getElementsByClassName("search_box")[0];
+    filter = input.value.toUpperCase();
+    li = document.getElementsByClassName("choice_btn");
+    console.log(li);
 
-    // $.post(window.location.href, {"message": message},function(response){
-    //     console.log(response);
-    //     console.log(typeof(response));
-
-    //     try {
-    //         //DIALOGFLOW RESPONSE CONTAIN DATA
-
-    //         response = JSON.parse(response);
-    //         console.log(response);
-
-    //         typing(0,"others");
-
-    //         $(".socketchatbox-chatArea").append( '<div class="socketchatbox-message-wrapper" id="wrapper' + j + '"><div class="socketchatbox-message socketchatbox-message-me"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime">' + date + '</span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">Choose your reply:</span><br></div></div>');
-
-    //         //<span id="option_holder' + j + '" class="socketchatbox-messageBody socketchatbox-messageBody-me"></span>
-
-    //         var i = 0;
-
-    //         for (msg in response) {
-    //             $(".socketchatbox-chatArea").append('<button class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + response[i] + '</button>');
-    //             i += 1;
-    //         }
-
-    //         //$(".socketchatbox-typing").hide();
-    //         //disable_input(false);
-    //         document.getElementById("btn" + (i-1) + j).scrollIntoView({behavior: "smooth"});
-    //     }
-    //     catch(err) {
-    //         //DIALOGFLOW RESPONSE DOES NOT CONTAIN DATA
-
-    //         console.log("Couldn't parse.", err)
-    //         typing(0,"others");
-
-    //         $(".socketchatbox-chatArea").append( '<div class="socketchatbox-message-wrapper" id="wrapper' + j + '"><div class="socketchatbox-message socketchatbox-message-others"><div class="socketchatbox-username">DialogFlow<span class="socketchatbox-messagetime">' + date + '</span></div><span class="socketchatbox-messageBody socketchatbox-messageBody-others">' + response +  '</span></div></div>');
-
-    //         //$(".socketchatbox-typing").hide();
-    //         disable_input(false);
-    //         document.getElementById("wrapper" + j).scrollIntoView({behavior: "smooth"});
-    //     }
-
-    //     date = cur_date();
-    // });
-
-
-
-//old RELOADS SAVED CONVERSATION
-// function reload_session_storage() {
-//     if (j == 0){
-//         console.log("are we doing this? j = " + j)
-//         //try {
-//             while (true) {
-//                 console.log(j);
-//                 if (sessionStorage.getItem("me-" + j) == null){
-//                     console.log("No saved data");
-//                     console.log("wrapper-others" + (j-1));
-//                     console.log(document.getElementById("wrapper-others" + (j-1)));
-//                     console.log("scrolling into view");
-//                     document.getElementById("wrapper-others" + (j-1)).scrollIntoView({behavior: "instant"});
-
-//                     return
-
-//                 }
-
-//                 $(".socketchatbox-chatArea").append(sessionStorage.getItem("me-" + j));
-//                 $(".socketchatbox-chatArea").append(sessionStorage.getItem("others-" + j));
-
-//                 for (var l = 0; true; l++) {
-//                     console.log(l);
-//                     if (sessionStorage.getItem("others-" + j + l) == null) {
-//                         console.log("no more appended data");
-//                         break;
-//                     }
-//                     else {
-//                         $(".socketchatbox-chatArea").append(sessionStorage.getItem("others-" + j + l));
-//                     }
-//                 }
-
-//                 try {
-//                     // console.log("J,L: " + j + l);
-//                     // console.log("wrapper-others" + j);
-//                     // console.log(document.getElementById("wrapper-others" + j));
-//                 }
-//                 catch(err){
-//                     console.log(err);
-//                 }
-
-//                 j += 1;
-//             }
-
-//         //}
-//         //catch(err) {
-//         //    console.log(err);
-//         //}
-//     }
-// };
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+        a = li[i];
+        if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
