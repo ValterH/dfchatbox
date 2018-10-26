@@ -301,13 +301,17 @@ function communicate(message,j){
                             else {
                                 reply_others += "<b>" +reception[reception_keys[0]] + " (čez " + reception[reception_keys[1]] + " dni)" + "<br></b>";
                             }
-
-                            // for (var m = 0; m < reception_keys.length; m++) {
-                            //     reply_others += reception[m]
-                            // }
                         }
                         else {
-                            reply_others += slo_keys[l] + ": " + data[k][keys[l]] + "<br>";
+                            if (keys[l]=="email") {
+                                reply_others += slo_keys[l] + ": " + '<a href="mailto:' + data[k][keys[l]] + '">' + data[k][keys[l]] + '</a><br>';
+                            }
+                            else if (keys[l]=="phone" && data[k][keys[l]] != "telefon ni podan") {
+                                reply_others += slo_keys[l] + ": " + '<a href="tel:' + data[k][keys[l]] + '">' + data[k][keys[l]] + '</a><br>'
+                            }
+                            else {
+                                reply_others += slo_keys[l] + ": " + data[k][keys[l]] + "<br>";
+                            }
                         }
                     };
 
@@ -481,7 +485,6 @@ function findProcedure () {
     input = document.getElementsByClassName("search_box")[0];
     filter = input.value.toUpperCase();
     li = document.getElementsByClassName("choice_btn");
-    console.log(li);
 
     // Loop through all list items, and hide those who don't match the search query
     for (i = 0; i < li.length; i++) {

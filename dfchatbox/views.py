@@ -200,7 +200,7 @@ def index(request):
 			else:
 				OGrequest.session['procedures'] = notRight([],data)
 			none={}
-			none['name']="Nobeden izmed zgoraj naštetih"
+			none['name']="Nobeden izmed naštetih"
 			none['value']= "reset"
 			data.append(none)
 		if text_answer.find("Ste mislili") > -1 or text_answer.find("skupine posegov") > -1 or text_answer.find("Izberi poseg")> -1:
@@ -336,7 +336,7 @@ def whoosh(input, inSLO):
 				dict['value']=input + " " + result.object.procedure_id
 				data.append(dict)
 		none={}
-		none['name']="Nobeden izmed zgoraj naštetih"
+		none['name']="Nobeden izmed naštetih"
 		none['value']=inSLO + " NONESLO"
 		data.append(none)
 
@@ -464,7 +464,7 @@ def findSLO(input, english):
 		dicti['value']= english + " " + result.procedure_id
 		data.append(dicti)
 	none={}
-	none['name']="Nobeden izmed zgoraj naštetih"
+	none['name']="Nobeden izmed naštetih"
 	none['value']= english + " NONE"
 	data.append(none)
 	return data
