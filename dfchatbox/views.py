@@ -313,7 +313,7 @@ def standardize_db(procedures):
 def notRight(incorrect, data):
 	remove = []
 	for item in data:
-		if item['name'] != 'Nobeden izmed zgoraj naštetih':
+		if item['name'] != 'Nobeden izmed naštetih':
 			if item['name'] in incorrect:
 				remove.append(item)
 			incorrect.append(item['name'])
