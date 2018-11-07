@@ -241,6 +241,11 @@ def index(request):
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}","url":"{3}"}}'.format(text_answer,response_type,data,url))
 		resetSession(OGrequest)
 		if text_answer:
+			if text_answer.find("Pri iskanju podatkov je prišlo do zamude")>-1:
+				text_answer = "Pri iskanju podatkov je prišlo do zamude, ali želite ponovno poskusiti?"
+				value = current_data['procedure'] + "; " + current_data['region'] + "; " + current_data['urgency']
+				data = [{"name":"DA", "value":value},{"name":"NE","value":"reset"}]
+				return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"procedures",data))
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format(text_answer,"error",[]))
 		else:
 			return HttpResponse('{{"text_answer":"{0}","response_type":"{1}","data":"{2}"}}'.format("Zgleda, da je prišlo do napake.","error",[]))
@@ -249,6 +254,11 @@ def index(request):
 
 @require_http_methods(['GET'])
 def update_db(request):
+	## TODO
+	# -pisi indekse do kdaj prevaja
+	# -ko neha shrani ix
+	# updataj od tam naprej
+	
 	url = "https://cakalnedobe.ezdrav.si/Home/GetProcedures"
 	procedures = json.loads(requests.get(url).text)
 	print (len(procedures))
@@ -257,6 +267,7 @@ def update_db(request):
 	for procedure in procedures:
 		nameSLO=edit(procedure['Name'])
 		nameENG=translate(nameSLO).lower()
+		print("ENG:",nameENG)
 		pid=procedure['Id']
 		print("SLO:",nameSLO)
 		lem =lemmatize(nameSLO)
@@ -377,7 +388,8 @@ def query(set,keywords):
 	result = set
 	for p in pairs:
 		new_set = set.filter(content=p[0]).filter(content=p[1])
-		result |= new_set
+		result = new_set
+	print(len(result))
 	if len(result) == 0 and len(keywords)>1:
 		for keyword in keywords:
 			new_set = set.filter(content=keyword)
