@@ -22,7 +22,6 @@ from datetime import datetime
 from dfchatbox.models import Procedure
 from haystack.query import SearchQuerySet
 
-# Create your views here.
 # -*- coding: utf-8 -*-
 
 @require_http_methods(['POST','GET'])

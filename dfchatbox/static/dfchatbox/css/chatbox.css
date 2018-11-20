@@ -1,70 +1,79 @@
 /* ======================================================= */
-/* ================ General Chatbox Style =================*/
+/* ==================== Chatbox Style ==================== */
 /* ======================================================= */
-
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
+.socketchatbox-page {
+  height:100%;
+  width:100%;
+  font-size: 28px; 
+  position: fixed;
+  border: 1px solid #0FB5DA;
+  bottom:0px;
+  /*overflow: auto;*/
+  max-width:100%;
+  line-height:1em;
+  /*  resize: horizontal;
+  */
+  background:white;
+  z-index:999;
+  font-family:Arial,Helvetica,sans-serif;
+  }
 
 * {
-  box-sizing: border-box;
+box-sizing: border-box;
 }
 
 ul {
-  list-style: none;
-  word-wrap: break-word;
+list-style: none;
+word-wrap: break-word;
 }
 
 .arrow-right {
-  width: 0; 
-  height: 0; 
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-  
-  border-left: 25px solid #80DFFF;
+width: 0; 
+height: 0; 
+border-top: 7px solid transparent;
+border-bottom: 7px solid transparent;
+
+border-left: 25px solid #80DFFF;
 }
+
 
 .socketchatbox-resize {
 
   top:0px;
   height:20px;
   width:20px;
-/*  background-color:#000;
-*/  position:absolute;
+  /*  background-color:#000;
+  */  position:absolute;
   z-index: 99999;
-
-}
-
+  
+  }
+  
 #socketchatbox-nw {
   left:0px; 
   cursor:nw-resize; 
-}
-
-#socketchatbox-ne{
+  }
+  
+  #socketchatbox-ne{
   right:0px;
   cursor:ne-resize; 
-}
-
-#socketchatbox-imagefile {
+  }
+  
+  #socketchatbox-imagefile {
   width:100%;
-}
-#socketchatbox-body {
+  }
+  #socketchatbox-body {
   background: #ededed;
   height:100%;
   width: 100%;
   /* border: 1px solid lightgray; */
-}
-
-
-.socketchatbox-inputMessage-div {
-  height: 50px;  
-  width: 60%;
-  margin:auto;
-  margin-top:25px;
-}
+  }
+  
 .socketchatbox-inputMessage {
   height:100%;
   width:calc(100% - 100px);
@@ -75,9 +84,9 @@ ul {
   border: 1px solid #4DACFF;
   font-size: medium;
   line-height: 2;
-}
-
-#socketchatbox-sendFileBtn {
+  }
+  
+  #socketchatbox-sendFileBtn {
   /*display: none;*/
   height: 100%;
   min-width: 100px;
@@ -87,19 +96,19 @@ ul {
   /* margin: 0; */
   border-radius: 0px;
   /* padding: 0; */
-}
-
-#socketchatbox-showHideChatbox {
+  }
+  
+  #socketchatbox-showHideChatbox {
   float:right;
   color: white;
   margin-right: 15px;
-}
-#socketchatbox-closeChatbox {
+  }
+  #socketchatbox-closeChatbox {
   float:right;
   color: white;
   margin-right: 25px;
-}
-#socketchatbox-username {
+  }
+  #socketchatbox-username {
   height:100%;
   float:left;
   margin-left: 10px;
@@ -107,9 +116,9 @@ ul {
   /*min-width: 20%;*/
   color: white;
   /*max-width:60%;*/
-}
-
-#socketchatbox-online-usercount {
+  }
+  
+  #socketchatbox-online-usercount {
     /* line-height: 1em; */
     /* padding: 5px; */
     color: white;
@@ -117,27 +126,27 @@ ul {
     /* border-radius: 50%; */
     border: 0px;
     /* height: 100%; */
-}
-.socketchatbox-onlineusers {
+  }
+  .socketchatbox-onlineusers {
   background: rgb(77, 172, 255);
   padding: 5px;
   width: 100%;
   display: none;
-}
-
-.socketchatbox-onlineusers span{
+  }
+  
+  .socketchatbox-onlineusers span{
   /* margin: 5px; */
   /* line-height: 1.3em; */
   display: inline-block;
   padding: 5px;
   color: #FFF;
-}
-
-#socketchatbox-username a {
+  }
+  
+  #socketchatbox-username a {
   color: white;
   text-decoration: none;
-}
-#socketchatbox-top {
+  }
+  #socketchatbox-top {
   min-width: 200px;
   cursor: pointer;
   height: 50px;
@@ -148,42 +157,25 @@ ul {
   /* border: 1px solid black; */
   opacity: 0.7;
   line-height: 30px;
-}
-
-
-.socketchatbox-page {
-  height:100%;
-  width:100%;
-  font-size: 18px; 
-  position: fixed;
-   border: 1px solid #0FB5DA;
-  bottom:0px;
-  /*overflow: auto;*/
-  max-width:100%;
-  line-height:1em;
-  /*  resize: horizontal;
-*/
-  background:white;
-  z-index:999;
-  font-family:Arial,Helvetica,sans-serif;
-}
-.socketchatbox-messages img{
+  }
+  
+  .socketchatbox-messages img{
   max-width: 100%;
-}
-
-.socketchatbox-messages video{
+  }
+  
+  .socketchatbox-messages video{
   max-width: 100%;
-}
-
-.socketchatbox-log {
+  }
+  
+  .socketchatbox-log {
   color: gray;
   font-size: smaller;
   margin: 5px;
   text-align: center;
-}
-
-
-.socketchatbox-chatArea {
+  }
+  
+  
+  .socketchatbox-chatArea {
   height:calc(100% - 150px);
   width: 80%;
   margin:auto;
@@ -193,55 +185,48 @@ ul {
   padding-right: 10px;
   padding-left: 10px;
   /*border-bottom-width: 0px;*/
-}
-
-.socketchatbox-message-wrapper {
+  }
+  
+  .socketchatbox-message-wrapper {
   /* width: 100%; */
   overflow: auto;
   /* margin-bottom: 15px; */
   padding-bottom: 10px;
-}
-
-.socketchatbox-messagetime {
+  }
+  
+  .socketchatbox-messagetime {
   color: gray;
-}
-
-.socketchatbox-messages {
+  }
+  
+  .socketchatbox-messages {
   height: 100%;
   margin: 0;
   /* padding-bottom: 0px; */
   padding: 0;
-}
-#socketchatbox-txt_fullname {
+  }
+  #socketchatbox-txt_fullname {
   color: black;
   line-height: 1em;
-
-}
-.socketchatbox-message-me >.socketchatbox-username{
+  
+  }
+  .socketchatbox-message-me >.socketchatbox-username{
   /*display: none;*/
   text-align: left;
   padding-left: 5px;
-}
-
-.socketchatbox-username {
-line-height: 1em;
-}
-
-
-.socketchatbox-message {
-  /* margin-bottom: 61px; */
-  /* max-width: 90%; */
-}
-
-
-.socketchatbox-message-others {
-   float: right; 
-   max-width: 100%;
-}
-
-
-
-.socketchatbox-messageBody {
+  }
+  
+  .socketchatbox-username {
+  line-height: 1em;
+  }
+  
+  .socketchatbox-message-others {
+  float: right; 
+  max-width: 100%;
+  }
+  
+  
+  
+  .socketchatbox-messageBody {
   margin-top: 7px;
   margin-left: 3px;
   margin-right: 3px;
@@ -256,30 +241,30 @@ line-height: 1em;
   word-wrap: break-word;
   /*word-break: break-all; */
   /* overflow-x: scroll; */
-}
-
-.socketchatbox-messageBody.hasMedia{
+  }
+  
+  .socketchatbox-messageBody.hasMedia{
   border: 1px solid lightgray;
   border-radius: 2px;
   padding: 0px;
-
-}
-
-
-.socketchatbox-messageBody-me {
+  
+  }
+  
+  
+  .socketchatbox-messageBody-me {
   background: #BBFF00;
-}
-
-.socketchatbox-messageBody-me.hasMedia {
+  }
+  
+  .socketchatbox-messageBody-me.hasMedia {
   border: 1px solid #BBFF00;
   background: #FFFFFF;
-}
-
-.socketchatbox-messageBody-others {
+  }
+  
+  .socketchatbox-messageBody-others {
   float: right;
-}
-
-.socketchatbox-typing {
+  }
+  
+  .socketchatbox-typing {
   color: white;
   text-align: center;
   font-size: small;
@@ -291,32 +276,25 @@ line-height: 1em;
   width: 100%;
   position: absolute;
   z-index: 10;
-}
- 
-.socketchatbox-username {
+  }
+  
+  .socketchatbox-username {
   font-weight: 700; 
   text-align: right;
   font-size: smaller;
-}
-
-
-#socketchatbox-imagepopup-src {
+  }
+  
+  
+  #socketchatbox-imagepopup-src {
   max-height: 100%;
   max-width: 100%;
-}
-
-.lightgray {
+  }
+  
+  .lightgray {
   background: lightgray;
-}
-
-/*body{
-  background-color: #173a4d;
-  display: flex;
-}*/
-
-/*TY*/
-
-.cssload-loader {
+  }
+  
+  .cssload-loader {
   width: 46px;
   height: 9px;
   position: absolute;
@@ -326,8 +304,8 @@ line-height: 1em;
     -ms-transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
-}
-.cssload-loader > div {
+  }
+  .cssload-loader > div {
   content: " ";
   width: 9px;
   height: 9px;
@@ -339,39 +317,39 @@ line-height: 1em;
     -ms-animation: cssload-shift 2.3s linear infinite;
     -webkit-animation: cssload-shift 2.3s linear infinite;
     -moz-animation: cssload-shift 2.3s linear infinite;
-}
-.cssload-loader > div:nth-of-type(1) {
+  }
+  .cssload-loader > div:nth-of-type(1) {
   animation-delay: -0.46s;
     -o-animation-delay: -0.46s;
     -ms-animation-delay: -0.46s;
     -webkit-animation-delay: -0.46s;
     -moz-animation-delay: -0.46s;
-}
-.cssload-loader > div:nth-of-type(2) {
+  }
+  .cssload-loader > div:nth-of-type(2) {
   animation-delay: -0.92s;
     -o-animation-delay: -0.92s;
     -ms-animation-delay: -0.92s;
     -webkit-animation-delay: -0.92s;
     -moz-animation-delay: -0.92s;
-}
-.cssload-loader > div:nth-of-type(3) {
+  }
+  .cssload-loader > div:nth-of-type(3) {
   animation-delay: -1.38s;
     -o-animation-delay: -1.38s;
     -ms-animation-delay: -1.38s;
     -webkit-animation-delay: -1.38s;
     -moz-animation-delay: -1.38s;
-}
-.cssload-loader > div:nth-of-type(4) {
+  }
+  .cssload-loader > div:nth-of-type(4) {
   animation-delay: -1.84s;
     -o-animation-delay: -1.84s;
     -ms-animation-delay: -1.84s;
     -webkit-animation-delay: -1.84s;
     -moz-animation-delay: -1.84s;
-}
-
-
-
-@keyframes cssload-shift {
+  }
+  
+  
+  
+  @keyframes cssload-shift {
   0% {
     left: -27px;
     opacity: 0;
@@ -390,9 +368,9 @@ line-height: 1em;
     background-color: rgb(102,181,57);
     opacity: 0;
   }
-}
-
-@-o-keyframes cssload-shift {
+  }
+  
+  @-o-keyframes cssload-shift {
   0% {
     left: -27px;
     opacity: 0;
@@ -411,9 +389,9 @@ line-height: 1em;
     background-color: rgb(102,181,57);
     opacity: 0;
   }
-}
-
-@-ms-keyframes cssload-shift {
+  }
+  
+  @-ms-keyframes cssload-shift {
   0% {
     left: -27px;
     opacity: 0;
@@ -432,9 +410,9 @@ line-height: 1em;
     background-color: rgb(102,181,57);
     opacity: 0;
   }
-}
-
-@-webkit-keyframes cssload-shift {
+  }
+  
+  @-webkit-keyframes cssload-shift {
   0% {
     left: -27px;
     opacity: 0;
@@ -453,9 +431,9 @@ line-height: 1em;
     background-color: rgb(102,181,57);
     opacity: 0;
   }
-}
-
-@-moz-keyframes cssload-shift {
+  }
+  
+  @-moz-keyframes cssload-shift {
   0% {
     left: -27px;
     opacity: 0;
@@ -474,9 +452,9 @@ line-height: 1em;
     background-color: rgb(102,181,57);
     opacity: 0;
   }
-}
-
-.search_box {
+  }
+  
+  .search_box {
   background-position: 10px 12px; /* Position the search icon */
   background-repeat: no-repeat; /* Do not repeat the icon image */
   width: 100%; /* Full-width */
@@ -484,8 +462,43 @@ line-height: 1em;
   padding: 12px 20px 12px 40px; /* Add some padding */
   border: 1px solid #ddd; /* Add a grey border */
   margin-bottom: 12px; /* Add some space below the input */
+  }
+  
+  .choice_btn {
+  float: right;
+  }
+
+
+/* ================================================================================================== */
+/* =============================================== MOBILE =========================================== */
+/* ================================================================================================== */
+
+.arrow-right {
+  margin-top: 33%;
+  width: 0; 
+  height: 0; 
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  
+  border-left: 25px solid #80DFFF;
+  }
+
+
+.socketchatbox-inputMessage-div {
+height: 10%;  
+width: 100%;
+margin:auto;
+margin-top:25px;
 }
 
-.choice_btn {
-  float: right;
-}
+/* ================================================================================================== */
+/* ============================================== DESKTOP =========================================== */
+/* ================================================================================================== */
+@media only screen and (min-width: 768px) {
+
+  .socketchatbox-inputMessage-div {
+    height: 50px;  
+    width: 60%;
+    margin:auto;
+    margin-top:25px;
+  }
