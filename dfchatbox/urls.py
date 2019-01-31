@@ -12,5 +12,5 @@ from . import views
 app_name = 'dfchatbox'
 urlpatterns = [
         path('',views.index,name='index'),
-        path('updateDatabase/',views.update_db,name='update_db')
+        #path('updateDatabase/',views.update_db,name='update_db')
         ]

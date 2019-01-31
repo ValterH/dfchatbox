@@ -254,6 +254,10 @@ border-left: 25px solid #80DFFF;
   .socketchatbox-messageBody-me {
   background: #BBFF00;
   }
+
+  .socketchatbox-messageBody-me-none {
+    background: #0FB5DA;
+    }
   
   .socketchatbox-messageBody-me.hasMedia {
   border: 1px solid #BBFF00;
@@ -502,3 +506,4 @@ margin-top:25px;
     margin:auto;
     margin-top:25px;
   }
+}

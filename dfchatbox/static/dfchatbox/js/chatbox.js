@@ -304,10 +304,10 @@ function communicate(message,j){
                         }
                         else {
                             if (keys[l]=="email") {
-                                reply_others += slo_keys[l] + ": " + '<a href="mailto:' + data[k][keys[l]] + '">' + data[k][keys[l]] + '</a><br>';
+                                reply_others += slo_keys[l] + ": " + '<a target="_blank" rel="noopener noreferrer" href="mailto:' + data[k][keys[l]] + '">' + data[k][keys[l]] + '</a><br>';
                             }
                             else if (keys[l]=="phone" && data[k][keys[l]] != "telefon ni podan") {
-                                reply_others += slo_keys[l] + ": " + '<a href="tel:' + data[k][keys[l]] + '">' + data[k][keys[l]] + '</a><br>'
+                                reply_others += slo_keys[l] + ": " + '<a target="_blank" rel="noopener noreferrer" href="tel:' + data[k][keys[l]] + '">' + data[k][keys[l]] + '</a><br>'
                             }
                             else {
                                 reply_others += slo_keys[l] + ": " + data[k][keys[l]] + "<br>";
@@ -341,7 +341,9 @@ function communicate(message,j){
                     $(".socketchatbox-chatArea").append('<div><input type="text" class="search_box" onkeyup="findProcedure()" placeholder="Išči"></input></div>')
                 }
                 for (var k = 0; k < data.length; k++) {
-                    $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
+                    val = data[k]['value'];
+                    if (val.indexOf("NONE") > -1 || val == "reset") $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me-none" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
+                    else $(".socketchatbox-chatArea").append('<button name="' + data[k]['value'] + '" class="choice_btn socketchatbox-messageBody socketchatbox-messageBody-me" id="btn' + i + j + '" type="button">' + data[k]['name'] + '</button>');
                     i += 1;
                 }
 

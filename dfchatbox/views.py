@@ -5,23 +5,16 @@ from django.http import HttpResponse
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 
-import re
-import imgkit
-import string
-import random
-from PIL import Image
 from lxml.html import fromstring
 from lxml import etree
 import json
 from bs4 import BeautifulSoup
-import urllib3
 import apiai
 import requests
-import base64
-from datetime import datetime
 from dfchatbox.models import Procedure
 from haystack.query import SearchQuerySet
 
+# Create your views here.
 # -*- coding: utf-8 -*-
 
 @require_http_methods(['POST','GET'])
@@ -201,7 +194,7 @@ def index(request):
 			none={}
 			none['name']="Nobeden izmed naštetih"
 			none['value']= "reset"
-			data.append(none)
+			data = [none] + data
 		if text_answer.find("Ste mislili") > -1 or text_answer.find("skupine posegov") > -1 or text_answer.find("Izberi poseg")> -1:
 			if OGrequest.session['urgency'] or OGrequest.session['region']:
 				for item in data:
@@ -241,6 +234,10 @@ def index(request):
 		resetSession(OGrequest)
 		if text_answer:
 			if text_answer.find("Pri iskanju podatkov je prišlo do zamude")>-1:
+				current_data={}
+				current_data['procedure']=answer_json['result']['parameters']['procedure']
+				current_data['region']=answer_json['result']['parameters']['region']
+				current_data['urgency']=answer_json['result']['parameters']['urgency']
 				text_answer = "Pri iskanju podatkov je prišlo do zamude, ali želite ponovno poskusiti?"
 				value = current_data['procedure'] + "; " + current_data['region'] + "; " + current_data['urgency']
 				data = [{"name":"DA", "value":value},{"name":"NE","value":"reset"}]
@@ -348,7 +345,7 @@ def whoosh(input, inSLO):
 		none={}
 		none['name']="Nobeden izmed naštetih"
 		none['value']=inSLO + " NONESLO"
-		data.append(none)
+		data = [none] + data
 
 	return data
 
@@ -477,7 +474,7 @@ def findSLO(input, english):
 	none={}
 	none['name']="Nobeden izmed naštetih"
 	none['value']= english + " NONE"
-	data.append(none)
+	data = [none] + data
 	return data
 
 def resetSession(request):
